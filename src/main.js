@@ -6,7 +6,7 @@ const renderTemplate = (container, position, template) => {
   container.insertAdjacentHTML(position, template);
 };
 
-const createRouteAndPriceTemplate = () => {
+const createRouteAndCostTemplate = () => {
   return (
     `<section class="trip-main__trip-info  trip-info">
 
@@ -157,7 +157,7 @@ const createEventTemplate = () => {
   );
 };
 
-const createEditFormTemplate = () => {
+const createEventEditFormTemplate = () => {
   return (
     `<li class="trip-events__item">
     <form class="event  event--edit" action="#" method="post">
@@ -336,9 +336,9 @@ const createEditFormTemplate = () => {
 };
 
 const header = document.querySelector(`.page-body`);
-const tripRouteAndPrice = header.querySelector(`.trip-main`);
+const tripRouteAndCost = header.querySelector(`.trip-main`);
 
-renderTemplate(tripRouteAndPrice, `afterBegin`, createRouteAndPriceTemplate());
+renderTemplate(tripRouteAndCost, `afterBegin`, createRouteAndCostTemplate());
 
 const tripRoute = header.querySelector(`.trip-info`);
 const tripMenu = header.querySelector(`.trip-controls`);
@@ -355,7 +355,7 @@ renderTemplate(tripEvent, `beforeend`, createDayTemplate());
 
 const tripEventList = tripEvent.querySelector(`.trip-events__list`);
 
-renderTemplate(tripEventList, `afterbegin`, createEditFormTemplate());
+renderTemplate(tripEventList, `afterbegin`, createEventEditFormTemplate());
 
 for (let i = 0; i < TRIP_EVENTS_AMOUNT; i += 1) {
   renderTemplate(tripEventList, `beforeend`, createEventTemplate());
