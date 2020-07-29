@@ -1,49 +1,33 @@
 'use strict';
 
-const TRIP_EVENTS_AMOUNT = 3;
-
-const renderTemplate = (container, position, template) => {
+const renderTemplate = (container, position, template) =>
   container.insertAdjacentHTML(position, template);
-};
 
-const createRouteAndCostTemplate = () => {
-  return (
+const createRouteAndCostTemplate =
     `<section class="trip-main__trip-info  trip-info">
 
-     </section>`
-  );
-};
+     </section>`;
 
-const createRouteInfoTemplate = () => {
-  return (
+const createRouteInfoTemplate =
     `<div class="trip-info__main">
        <h1 class="trip-info__title">Amsterdam &mdash; Chamonix &mdash; Geneva</h1>
 
        <p class="trip-info__dates">Mar 18&nbsp;&mdash;&nbsp;20</p>
-     </div>`
-  );
-};
+     </div>`;
 
-const createRouteCostTemplate = () => {
-  return (
+const createRouteCostTemplate =
     `<p class="trip-info__cost">
      Total: &euro;&nbsp;<span class="trip-info__cost-value">1230</span>
-     </p>`
-  );
-};
+     </p>`;
 
-const createMenuTemplate = () => {
-  return (
+const createMenuTemplate =
     `<h2 class="visually-hidden">Switch trip view</h2>
      <nav class="trip-controls__trip-tabs  trip-tabs">
        <a class="trip-tabs__btn  trip-tabs__btn--active" href="#">Table</a>
        <a class="trip-tabs__btn" href="#">Stats</a>
-     </nav>`
-  );
-};
+     </nav>`;
 
-const createFiltersTemplate = () => {
-  return (
+const createFiltersTemplate =
     `<h2 class="visually-hidden">Filter events</h2>
     <form class="trip-filters" action="#" method="get">
        <div class="trip-filters__filter">
@@ -62,12 +46,9 @@ const createFiltersTemplate = () => {
        </div>
 
        <button class="visually-hidden" type="submit">Accept filter</button>
-     </form>`
-  );
-};
+     </form>`;
 
-const createSortTemplate = () => {
-  return (
+const createSortTemplate =
     `<h2 class="visually-hidden">Trip events</h2>
      <form class="trip-events__trip-sort  trip-sort" action="#" method="get">
     <span class="trip-sort__item  trip-sort__item--day">Day</span>
@@ -98,12 +79,9 @@ const createSortTemplate = () => {
     </div>
 
       <span class="trip-sort__item  trip-sort__item--offers">Offers</span>
-    </form>`
-  );
-};
+    </form>`;
 
-const createDayTemplate = () => {
-  return (
+const createDayTemplate =
     `<ul class="trip-days">
       <li class="trip-days__item  day">
       <div class="day__info">
@@ -114,12 +92,9 @@ const createDayTemplate = () => {
 
       </ul>
       </li>
-      </ul>`
-  );
-};
+      </ul>`;
 
-const createEventTemplate = () => {
-  return (
+const createEventTemplate =
     `<li class="trip-events__item">
     <div class="event">
       <div class="event__type">
@@ -153,12 +128,9 @@ const createEventTemplate = () => {
         <span class="visually-hidden">Open event</span>
       </button>
     </div>
-  </li>`
-  );
-};
+  </li>`;
 
-const createEventEditFormTemplate = () => {
-  return (
+const createEventEditFormTemplate =
     `<li class="trip-events__item">
     <form class="event  event--edit" action="#" method="post">
       <header class="event__header">
@@ -331,32 +303,30 @@ const createEventEditFormTemplate = () => {
         </section>
       </section>
     </form>
-  </li>`
-  );
-};
+  </li>`;
 
 const header = document.querySelector(`.page-body`);
-const tripRouteAndCost = header.querySelector(`.trip-main`);
+const tripMainContainer = header.querySelector(`.trip-main`);
 
-renderTemplate(tripRouteAndCost, `afterBegin`, createRouteAndCostTemplate());
+renderTemplate(tripMainContainer, `afterBegin`, createRouteAndCostTemplate);
 
 const tripRoute = header.querySelector(`.trip-info`);
 const tripMenu = header.querySelector(`.trip-controls`);
 
-renderTemplate(tripRoute, `afterbegin`, createRouteInfoTemplate());
-renderTemplate(tripRoute, `beforeend`, createRouteCostTemplate());
-renderTemplate(tripMenu, `afterbegin`, createMenuTemplate());
-renderTemplate(tripMenu, `beforeend`, createFiltersTemplate());
+renderTemplate(tripRoute, `afterbegin`, createRouteInfoTemplate);
+renderTemplate(tripRoute, `beforeend`, createRouteCostTemplate);
+renderTemplate(tripMenu, `afterbegin`, createMenuTemplate);
+renderTemplate(tripMenu, `beforeend`, createFiltersTemplate);
 
-const tripEvent = header.querySelector(`.trip-events`);
+const tripEventsContainer = header.querySelector(`.trip-events`);
 
-renderTemplate(tripEvent, `afterbegin`, createSortTemplate());
-renderTemplate(tripEvent, `beforeend`, createDayTemplate());
+renderTemplate(tripEventsContainer, `afterbegin`, createSortTemplate);
+renderTemplate(tripEventsContainer, `beforeend`, createDayTemplate);
 
-const tripEventList = tripEvent.querySelector(`.trip-events__list`);
+const tripDayEventsContainer = tripEventsContainer.querySelector(`.trip-events__list`);
 
-renderTemplate(tripEventList, `afterbegin`, createEventEditFormTemplate());
+renderTemplate(tripDayEventsContainer, `afterbegin`, createEventEditFormTemplate);
 
-for (let i = 0; i < TRIP_EVENTS_AMOUNT; i += 1) {
-  renderTemplate(tripEventList, `beforeend`, createEventTemplate());
-}
+new Array(3).fill(`*`).forEach(function () {
+  renderTemplate(tripDayEventsContainer, `beforeend`, createEventTemplate);
+});
