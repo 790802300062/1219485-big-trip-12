@@ -10,7 +10,7 @@ import {generateEvent} from "./mock/event.js";
 import {render, RenderPosition} from "./utils.js";
 import {Key, EventMessage} from "./const.js";
 
-const EVENTS_AMOUNT = 0;
+const EVENTS_AMOUNT = 25;
 
 const events = new Array(EVENTS_AMOUNT).fill().map(generateEvent);
 
