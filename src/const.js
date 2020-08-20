@@ -45,3 +45,8 @@ export const Key = {
   ENTER: `Enter`,
   ESCAPE: `Escape`
 };
+
+export const EventMessage = {
+  NO_EVENTS: `Click New Event to create your first point`,
+  LOADING: `Loading...`
+}

@@ -5,11 +5,12 @@ import SortView from "./view/sort.js";
 import DayView from "./view/day.js";
 import EditEventView from "./view/edit-event-form.js";
 import EventView from "./view/event.js";
+import EventMessageView from "./view/message.js";
 import {generateEvent} from "./mock/event.js";
 import {render, RenderPosition} from "./utils.js";
-import {Key} from "./const.js";
+import {Key, EventMessage} from "./const.js";
 
-const EVENTS_AMOUNT = 25;
+const EVENTS_AMOUNT = 0;
 
 const events = new Array(EVENTS_AMOUNT).fill().map(generateEvent);
 
@@ -29,7 +30,12 @@ render(tripControlElement, new MenuControlsView().getElement(), RenderPosition.A
 
 const tripEventsElement = document.querySelector(`.trip-events`);
 render(tripEventsElement, new SortView().getElement(), RenderPosition.BEFOREEND);
-render(tripEventsElement, new DayView(events).getElement(), RenderPosition.BEFOREEND);
+
+if (!events.length) {
+  render(tripEventsElement, new EventMessageView(EventMessage.NO_EVENTS).getElement(), RenderPosition.BEFOREEND);
+} else {
+  render(tripEventsElement, new DayView(events).getElement(), RenderPosition.BEFOREEND);
+}
 
 const DaysElement = document.querySelectorAll(`.trip-days__item`);
 
