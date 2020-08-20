@@ -40,3 +40,8 @@ export const OPTIONS = [
     eventType: `arrival`
   }
 ];
+
+export const Key = {
+  ENTER: `Enter`,
+  ESCAPE: `Escape`
+};

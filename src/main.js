@@ -7,6 +7,7 @@ import EditEventView from "./view/edit-event-form.js";
 import EventView from "./view/event.js";
 import {generateEvent} from "./mock/event.js";
 import {render, RenderPosition} from "./utils.js";
+import {Key} from "./const.js";
 
 const EVENTS_AMOUNT = 25;
 
@@ -48,6 +49,7 @@ const renderEvents = (eventListElement, event) => {
 
   eventComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
     replaceEventToForm();
+    document.addEventListener(`keydown`, onEscKeyDown);
   });
 
   eventEditComponent.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, () => {
@@ -57,7 +59,16 @@ const renderEvents = (eventListElement, event) => {
   eventEditComponent.getElement().addEventListener(`submit`, (evt) => {
     evt.preventDefault();
     replaceFormToEvent();
+    document.removeEventListener(`keydown`, onEscKeyDown);
   });
+
+  const onEscKeyDown = (evt) => {
+    if (evt.key === Key.ENTER || evt.key === Key.ESCAPE) {
+      evt.preventDefault();
+      replaceFormToEvent();
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    }
+  };
 };
 
 for (let dayElement of DaysElement) {
