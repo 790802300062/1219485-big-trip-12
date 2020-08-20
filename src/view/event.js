@@ -1,10 +1,11 @@
 import {getEndTime} from '../utils.js';
 import {getTimeInHours} from '../utils.js';
+import {createElement} from "../utils.js";
 
 const EVENT_TYPE_NAME = `arrival`;
 const MAX_VISIT_OPTION_AMOUNT = 3;
 
-export const createEventTemplate = (currentEvent) => {
+const createEventTemplate = (currentEvent) => {
   const {event, destinationCity, startDate, duration, price, options} = currentEvent;
 
   const preposition = event.type === EVENT_TYPE_NAME
@@ -65,3 +66,26 @@ export const createEventTemplate = (currentEvent) => {
     </li>`
   );
 };
+
+export default class Event {
+  constructor(event) {
+    this._event = event;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createEventTemplate(this._event);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

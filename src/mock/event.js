@@ -1,7 +1,7 @@
 import {getRandomInteger} from '../utils.js';
 import {OPTIONS} from '../const.js';
 
-const TRIP_EVENT = [
+const TRIP_EVENTS = [
   {
     name: `Taxi`,
     type: `moving`
@@ -44,7 +44,7 @@ const TRIP_EVENT = [
   }
 ];
 
-const DESTINATION_CITY = [
+const DESTINATION_CITIES = [
   `London`,
   `Paris`,
   `New York`,
@@ -59,8 +59,10 @@ const DESTINATION_CITY = [
   `Prague`
 ];
 
-const MIN_PRICE = 5;
-const MAX_PRICE = 500;
+const EventPrice = {
+  MIN: 5,
+  MAX: 500
+};
 
 const DESCRIPTION = `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                      Cras aliquet varius magna, non porta ligula feugiat eget.
@@ -74,37 +76,43 @@ const DESCRIPTION = `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 
 const DAY_GAP = 15;
 
-const MAX_HOURS = 23;
-const MAX_MINUTES = 59;
+const MaxInDayTime = {
+  HOURS: 23,
+  MINUTES: 59
+};
 
-const MIN_OPTION = 1;
-const MAX_OPTION = 4;
+const OptionAmount = {
+  MIN: 0,
+  MAX: 4
+};
 
-const MIN_PHOTO_COUNT = 1;
-const MAX_PHOTO_COUNT = 10;
+const PhotoAmount = {
+  MIN: 1,
+  MAX: 10
+};
 
 const MAX_DESCRIPTION_SENTENCE_AMOUNT = 4;
 
 const generateOptions = (eventType) => {
-  const optionCount = getRandomInteger(MIN_OPTION, MAX_OPTION);
-  const optionSet = new Set();
+  const optionCount = getRandomInteger(OptionAmount.MIN, OptionAmount.MAX);
+  const additionalOptions = new Set();
   do {
-    const curOptionNum = getRandomInteger(MIN_OPTION, OPTIONS.length - 1);
-    if (OPTIONS[curOptionNum].eventType === eventType) {
-      optionSet.add(curOptionNum);
+    const currentOptionNumber = getRandomInteger(OptionAmount.MIN, OPTIONS.length - 1);
+    if (OPTIONS[currentOptionNumber].eventType === eventType) {
+      additionalOptions.add(currentOptionNumber);
     }
-  } while (optionSet.size < optionCount);
-  const optionsList = [];
-  for (let item of optionSet) {
-    optionsList.push(OPTIONS[item]);
+  } while (additionalOptions.size < optionCount);
+  const listOfOptions = [];
+  for (let item of additionalOptions) {
+    listOfOptions.push(OPTIONS[item]);
   }
-  return optionsList;
+  return listOfOptions;
 };
 
 const generateEventType = () => {
-  const randomIndex = getRandomInteger(0, TRIP_EVENT.length - 1);
+  const randomIndex = getRandomInteger(0, TRIP_EVENTS.length - 1);
 
-  return TRIP_EVENT[randomIndex];
+  return TRIP_EVENTS[randomIndex];
 };
 
 const destinationDescription = () => {
@@ -119,31 +127,31 @@ const destinationDescription = () => {
 };
 
 const generateDestinationCity = () => {
-  const randomIndex = getRandomInteger(0, DESTINATION_CITY.length - 1);
+  const randomIndex = getRandomInteger(0, DESTINATION_CITIES.length - 1);
 
-  return DESTINATION_CITY[randomIndex];
+  return DESTINATION_CITIES[randomIndex];
 };
 
 const generateDuration = () => {
   return {
-    hour: getRandomInteger(0, MAX_HOURS),
-    minute: getRandomInteger(0, MAX_MINUTES)
+    hour: getRandomInteger(0, MaxInDayTime.HOURS),
+    minute: getRandomInteger(0, MaxInDayTime.MINUTES)
   };
 };
 
-const generateStartDate = (gap) => {
+const generateStartDate = () => {
   const min = new Date();
   const max = new Date();
-  max.setDate(min.getDate() + Math.round(gap / 2));
-  min.setDate(min.getDate() - Math.round(gap / 2));
+  max.setDate(min.getDate() + Math.round(DAY_GAP / 2));
+  min.setDate(min.getDate() - Math.round(DAY_GAP / 2));
 
   return new Date(+min + Math.random() * (max - min));
 };
 
 const generatePhotos = () => {
-  let photos = [];
+  const photos = [];
 
-  for (let i = 0; i < getRandomInteger(MIN_PHOTO_COUNT, MAX_PHOTO_COUNT); i++) {
+  for (let i = 0; i < getRandomInteger(PhotoAmount.MIN, PhotoAmount.MAX); i++) {
     photos.push(`http://picsum.photos/248/152?r=${Math.random()}`);
   }
 
@@ -157,7 +165,7 @@ export const generateEvent = () => {
     destinationCity: generateDestinationCity(),
     startDate: generateStartDate(DAY_GAP),
     duration: generateDuration(),
-    price: getRandomInteger(MIN_PRICE, MAX_PRICE),
+    price: getRandomInteger(EventPrice.MIN, EventPrice.MAX),
     options: generateOptions(`moving`),
     destination: {
       descr: destinationDescription(),

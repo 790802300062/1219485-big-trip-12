@@ -1,4 +1,6 @@
-export const createSortTemplate = () => {
+import {createElement} from "../utils.js";
+
+const createSortTemplate = () => {
   const sort = [
     {
       label: `day`,
@@ -37,7 +39,7 @@ export const createSortTemplate = () => {
     }
   ];
 
-  const icon = (hasIcon) => {
+  const transportSymbol = (hasIcon) => {
     return hasIcon ? `<svg class="trip-sort__direction-icon" width="8" height="10" viewBox="0 0 8 10">
       <path d="M2.888 4.852V9.694H5.588V4.852L7.91 5.068L4.238 0.00999987L0.548 5.068L2.888 4.852Z"/>
     </svg>` : ``;
@@ -53,7 +55,7 @@ export const createSortTemplate = () => {
           <input id="sort-time" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${item.label}" ${item.isChecked ? `checked` : ``}>
           <label class="trip-sort__btn" for="sort-${item.label}">
             ${item.name}
-            ${icon(item.hasIcon)}
+            ${transportSymbol(item.hasIcon)}
           </label>
         </div>`;
       }
@@ -69,3 +71,25 @@ export const createSortTemplate = () => {
       </form>`
   );
 };
+
+export default class Sort {
+  constructor() {
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createSortTemplate();
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
