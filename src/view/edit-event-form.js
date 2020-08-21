@@ -1,23 +1,26 @@
 import {OPTIONS} from '../const.js';
 import {getEndTime} from '../utils.js';
 import {getTimeInHours} from '../utils.js';
+import {createElement} from "../utils.js";
 
-export const createEditEventTemplate = (currentEvent = {}) => {
-  const {
-    event = {
-      name: `Flight`,
-      type: `moving`
-    },
-    destinationCity = `Alaska`,
-    startDate = new Date(),
-    duration = {
-      hour: 0,
-      minute: 0
-    },
-    price = 0,
-    options = [],
-    destination = {}
-  } = currentEvent;
+const BLANK_EVENT = {
+  event: {
+    name: `Flight`,
+    type: `moving`
+  },
+  destinationCity: `Alaska`,
+  startDate: new Date(),
+  duration: {
+    hour: 0,
+    minute: 0
+  },
+  price: 0,
+  options: [],
+  destination: {}
+};
+
+const createEditEventTemplate = (currentEvent = {}) => {
+  const {event, destinationCity, startDate, duration, price, options, destination} = currentEvent;
 
   const preposition = event.type === `arrival`
     ? `in`
@@ -216,3 +219,26 @@ export const createEditEventTemplate = (currentEvent = {}) => {
     </form>`
   );
 };
+
+export default class EditEvent {
+  constructor(event = BLANK_EVENT) {
+    this._event = event;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createEditEventTemplate(this._event);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
