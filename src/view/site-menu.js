@@ -1,32 +1,15 @@
-import {createElement} from "../utils.js";
+import AbstractView from "./abstract.js";
 
-const createMenuControlsTemplate = () => {
-  return (
-    `<nav class="trip-controls__trip-tabs  trip-tabs">
-      <a class="trip-tabs__btn  trip-tabs__btn--active" href="#">Table</a>
-      <a class="trip-tabs__btn" href="#">Stats</a>
-    </nav>`
-  );
-};
+const createMenuControlsTemplate = () => (
+  `<nav class="trip-controls__trip-tabs  trip-tabs">
+    <a class="trip-tabs__btn  trip-tabs__btn--active" href="#">Table</a>
+    <a class="trip-tabs__btn" href="#">Stats</a>
+  </nav>`
+);
 
-export default class MenuControls {
-  constructor() {
-    this._element = null;
-  }
+export default class MenuControls extends AbstractView {
 
   getTemplate() {
     return createMenuControlsTemplate();
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

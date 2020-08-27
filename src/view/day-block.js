@@ -1,5 +1,5 @@
-import {getTimeInHours} from '../utils.js';
-import {createElement} from "../utils.js";
+import AbstractView from "./abstract.js";
+import {getTimeInHours} from '../utils/common.js';
 
 const MONTHS_NAMES = [`Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec`];
 
@@ -47,25 +47,13 @@ export const createDayTemplate = (events) => {
   );
 };
 
-export default class DayBlock {
+export default class DayBlock extends AbstractView {
   constructor(event) {
+    super();
     this._event = event;
-    this._element = null;
   }
 
   getTemplate() {
     return createDayTemplate(this._event);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

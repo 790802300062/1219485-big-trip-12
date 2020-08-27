@@ -1,16 +1,13 @@
 import MenuControlsView from "./view/site-menu.js";
 import TripInfoView from "./view/trip-info.js";
-import FiltersView from "./view/filter.js";
-import SortView from "./view/sort.js";
-import DayView from "./view/day.js";
-import EditEventView from "./view/edit-event-form.js";
-import EventView from "./view/event.js";
-import EventMessageView from "./view/message.js";
+import FilterView from "./view/filters.js";
+import TripPresenter from "./presenter/trip.js";
+import EventMessageView from "./view/event-message.js";
 import {generateEvent} from "./mock/event.js";
-import {render, RenderPosition} from "./utils.js";
-import {Key, EventMessage} from "./const.js";
+import {render, RenderPosition, remove} from "./utils/render.js";
+import {EventMessage} from "./const.js";
 
-const EVENTS_AMOUNT = 25;
+const EVENTS_AMOUNT = 0;
 
 const events = new Array(EVENTS_AMOUNT).fill().map(generateEvent);
 
@@ -21,67 +18,31 @@ events.sort((a, b) => {
 });
 
 const tripMainElement = document.querySelector(`.trip-main`);
-render(tripMainElement, new TripInfoView().getElement(), RenderPosition.AFTERBEGIN);
+render(tripMainElement, new TripInfoView(), RenderPosition.AFTERBEGIN);
 
 const tripControlElement = tripMainElement.querySelector(`.trip-main__trip-controls`);
 
-render(tripControlElement, new FiltersView().getElement(), RenderPosition.BEFOREEND);
-render(tripControlElement, new MenuControlsView().getElement(), RenderPosition.AFTEREND);
+render(tripControlElement, new FilterView(), RenderPosition.BEFOREEND);
+render(tripControlElement, new MenuControlsView(), RenderPosition.AFTEREND);
 
 const tripEventsElement = document.querySelector(`.trip-events`);
-render(tripEventsElement, new SortView().getElement(), RenderPosition.BEFOREEND);
+const tripPresenter = new TripPresenter(tripEventsElement);
+tripPresenter.init(events);
 
 if (!events.length) {
-  render(tripEventsElement, new EventMessageView(EventMessage.NO_EVENTS).getElement(), RenderPosition.BEFOREEND);
-} else {
-  render(tripEventsElement, new DayView(events).getElement(), RenderPosition.BEFOREEND);
+  remove(TripInfoView());
+  render(tripEventsElement, new EventMessageView(EventMessage.NO_EVENTS), RenderPosition.BEFOREEND);
 }
 
-const DaysElement = document.querySelectorAll(`.trip-days__item`);
 
-const renderEvents = (eventListElement, event) => {
-  const eventComponent = new EventView(event);
-  const eventEditComponent = new EditEventView(event);
 
-  render(eventListElement, eventComponent.getElement(), RenderPosition.BEFOREEND);
 
-  const replaceEventToForm = () => {
-    eventListElement.replaceChild(eventEditComponent.getElement(), eventComponent.getElement());
+/*  const onEscKeyDown = (evt) => {
+  if (!evt.key === Key.ENTER || evt.key === Key.ESCAPE) {
+    return
   };
 
-  const replaceFormToEvent = () => {
-    eventListElement.replaceChild(eventComponent.getElement(), eventEditComponent.getElement());
-  };
-
-  eventComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
-    replaceEventToForm();
-    document.addEventListener(`keydown`, onEscKeyDown);
-  });
-
-  eventEditComponent.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, () => {
-    replaceFormToEvent();
-  });
-
-  eventEditComponent.getElement().addEventListener(`submit`, (evt) => {
-    evt.preventDefault();
-    replaceFormToEvent();
-    document.removeEventListener(`keydown`, onEscKeyDown);
-  });
-
-  const onEscKeyDown = (evt) => {
-    if (evt.key === Key.ENTER || evt.key === Key.ESCAPE) {
-      evt.preventDefault();
-      replaceFormToEvent();
-      document.removeEventListener(`keydown`, onEscKeyDown);
-    }
-  };
-};
-
-for (let dayElement of DaysElement) {
-  let date = new Date(dayElement.querySelector(`.day__date`).getAttribute(`datetime`));
-  let dayEvents = events.filter((event) => event.startDate.getMonth() === date.getMonth() && event.startDate.getDate() === date.getDate());
-  for (let event of dayEvents) {
-    renderEvents(dayElement.querySelector(`.trip-events__list`), event);
-  }
-}
-
+  evt.preventDefault();
+  replaceFormToEvent();
+  document.removeEventListener(`keydown`, onEscKeyDown);
+}*/
