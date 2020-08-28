@@ -1,4 +1,4 @@
-import {getRandomInteger} from '../utils.js';
+import {getRandomInteger} from '../utils/common.js';
 import {OPTIONS} from '../const.js';
 
 const TRIP_EVENTS = [
@@ -94,14 +94,14 @@ const PhotoAmount = {
 const MAX_DESCRIPTION_SENTENCE_AMOUNT = 4;
 
 const generateOptions = (eventType) => {
-  const optionCount = getRandomInteger(OptionAmount.MIN, OptionAmount.MAX);
-  const additionalOptions = new Set();
-  do {
+  const additionalOptions = Array.from(new Set());
+  additionalOptions.forEach(function () {
     const currentOptionNumber = getRandomInteger(OptionAmount.MIN, OPTIONS.length - 1);
     if (OPTIONS[currentOptionNumber].eventType === eventType) {
       additionalOptions.add(currentOptionNumber);
     }
-  } while (additionalOptions.size < optionCount);
+  });
+
   const listOfOptions = [];
   for (let item of additionalOptions) {
     listOfOptions.push(OPTIONS[item]);
@@ -168,7 +168,7 @@ export const generateEvent = () => {
     price: getRandomInteger(EventPrice.MIN, EventPrice.MAX),
     options: generateOptions(`moving`),
     destination: {
-      descr: destinationDescription(),
+      description: destinationDescription(),
       photo: generatePhotos()
     }
   };

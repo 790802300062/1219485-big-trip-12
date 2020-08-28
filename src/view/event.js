@@ -1,6 +1,6 @@
-import {getEndTime} from '../utils.js';
-import {getTimeInHours} from '../utils.js';
-import {createElement} from "../utils.js";
+import AbstractView from "../view/abstract.js";
+import {getEndTime} from '../utils/event.js';
+import {getTimeInHours} from '../utils/common.js';
 
 const EVENT_TYPE_NAME = `arrival`;
 const MAX_VISIT_OPTION_AMOUNT = 3;
@@ -67,25 +67,24 @@ const createEventTemplate = (currentEvent) => {
   );
 };
 
-export default class Event {
+export default class Event extends AbstractView {
   constructor(event) {
+    super();
     this._event = event;
-    this._element = null;
+    this._eventClickHandler = this._eventClickHandler.bind(this);
   }
 
   getTemplate() {
     return createEventTemplate(this._event);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
+  _eventClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.eventClick();
   }
 
-  removeElement() {
-    this._element = null;
+  setEventClickHandler(callback) {
+    this._callback.eventClick = callback;
+    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._eventClickHandler);
   }
 }

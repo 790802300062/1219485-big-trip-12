@@ -1,7 +1,7 @@
+import AbstractView from "./abstract.js";
 import {OPTIONS} from '../const.js';
-import {getEndTime} from '../utils.js';
-import {getTimeInHours} from '../utils.js';
-import {createElement} from "../utils.js";
+import {getEndTime} from '../utils/event.js';
+import {getTimeInHours} from '../utils/common.js';
 
 const BLANK_EVENT = {
   event: {
@@ -29,7 +29,7 @@ const createEditEventTemplate = (currentEvent = {}) => {
   const getAvailableOption = ()=> {
     const availableOptionName = new Set();
 
-    for (let option of options) {
+    for (const option of options) {
       availableOptionName.add(option.name);
     }
 
@@ -39,7 +39,7 @@ const createEditEventTemplate = (currentEvent = {}) => {
   const createOptionTemplate = () => {
     let optionList = ``;
     const availableOptionList = getAvailableOption();
-    for (let option of OPTIONS) {
+    for (const option of OPTIONS) {
       if (event.type === option.eventType) {
         optionList += `<div class="event__offer-selector">
           <input
@@ -59,11 +59,12 @@ const createEditEventTemplate = (currentEvent = {}) => {
 
     return optionList;
   };
+
   const optionTemplate = createOptionTemplate();
 
   const createDescrPhotoTemplate = (photoList) => {
     let descrPhotoList = ``;
-    for (let photo of photoList) {
+    for (const photo of photoList) {
       descrPhotoList += `<img class="event__photo" src="${photo}" alt="Event photo">`;
     }
 
@@ -73,17 +74,25 @@ const createEditEventTemplate = (currentEvent = {}) => {
   const endDate = getEndTime(startDate, duration);
 
   const getDate = (date) => {
-    return getTimeInHours(date.getDate()) + `/` + getTimeInHours(date.getMonth()) + `/` + String(date.getFullYear()).slice(-2) + ` ` + getTimeInHours(date.getHours()) + `:` + getTimeInHours(date.getMinutes());
+    getTimeInHours(date.getDate()) +
+    `/` +
+    getTimeInHours(date.getMonth()) +
+    `/` +
+    String(date.getFullYear()).slice(-2) +
+    ` ` +
+    getTimeInHours(date.getHours()) +
+    `:` +
+    getTimeInHours(date.getMinutes());
   };
 
   const createDescriptionTemplate = () => {
-    if (!destination.descr && !destination.photo) {
+    if (!destination.description && !destination.photo) {
       return ``;
     }
 
     return `<section class="event__section  event__section--destination">
       <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-      ${destination.descr ? `<p class="event__destination-description">${destination.descr}</p>` : ``}
+      ${destination.description ? `<p class="event__destination-description">${destination.description}</p>` : ``}
       <div class="event__photos-container">
         <div class="event__photos-tape">
          ${createDescrPhotoTemplate(destination.photo)}
@@ -220,25 +229,35 @@ const createEditEventTemplate = (currentEvent = {}) => {
   );
 };
 
-export default class EditEvent {
+export default class EditEvent extends AbstractView {
   constructor(event = BLANK_EVENT) {
+    super();
     this._event = event;
-    this._element = null;
+    this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._cancelClickHandler = this._cancelClickHandler.bind(this);
   }
 
   getTemplate() {
     return createEditEventTemplate(this._event);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
+  _formSubmitHandler(evt) {
+    evt.preventDefault();
+    this._callback.formSubmit();
   }
 
-  removeElement() {
-    this._element = null;
+  setFormSubmitHandler(callback) {
+    this._callback.formSubmit = callback;
+    this.getElement().addEventListener(`submit`, this._formSubmitHandler);
+  }
+
+  _cancelClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.cancelClick();
+  }
+
+  setCancelClickHandler(callback) {
+    this._callback.cancelClick = callback;
+    this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._cancelClickHandler);
   }
 }

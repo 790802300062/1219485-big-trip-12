@@ -1,7 +1,7 @@
-import {createElement} from "../utils.js";
+import AbstractView from "./abstract.js";
 
 const createFiltersTemplate = () => {
-  const filter = [
+  const filters = [
     {
       label: `everything`,
       name: `Everything`,
@@ -21,7 +21,7 @@ const createFiltersTemplate = () => {
 
   const createFilter = () => {
     let filterItems = ``;
-    for (let item of filter) {
+    for (let item of filters) {
       filterItems += `<div class="trip-filters__filter">
         <input id="filter-past" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${item.label}" ${item.isChecked ? `checked` : `` }>
           <label class="trip-filters__filter-label" for="filter-past">${item.name}</label>
@@ -40,24 +40,9 @@ const createFiltersTemplate = () => {
   );
 };
 
-export default class Filters {
-  constructor() {
-    this._element = null;
-  }
+export default class Filters extends AbstractView {
 
   getTemplate() {
     return createFiltersTemplate();
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
