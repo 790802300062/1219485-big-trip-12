@@ -109,3 +109,21 @@ export const EventMessage = {
   NO_EVENTS: `Click New Event to create your first point`,
   LOADING: `Loading...`
 };
+
+export const UserAction = {
+  UPDATE_EVENT: `UPDATE_EVENT`,
+  ADD_EVENT: `ADD_EVENT`,
+  DELETE_EVENT: `DELETE_EVENT`
+};
+
+export const UpdateType = {
+  PATCH: `PATCH`,
+  MINOR: `MINOR`,
+  MAJOR: `MAJOR`
+};
+
+export const FilterType = {
+  EVERYTHING: `Everything`,
+  FUTURE: `Future`,
+  PAST: `Past`,
+};

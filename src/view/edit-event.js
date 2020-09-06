@@ -191,7 +191,7 @@ const createEditEventTemplate = (currentEvent = {}) => {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
+          <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${price}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -229,12 +229,17 @@ export default class EditEvent extends SmartView {
 
     this._eventNameTypeHandler = this._eventNameTypeHandler.bind(this);
     this._eventCityHandler = this._eventCityHandler.bind(this);
+    this._formDeleteClickHandler = this._formDeleteClickHandler.bind(this);
 
     this._setInnerHandlers();
   }
 
   getTemplate() {
     return createEditEventTemplate(this._data);
+  }
+
+  removeElement() {
+    super.removeElement();
   }
 
   _formSubmitHandler(evt) {
@@ -245,6 +250,7 @@ export default class EditEvent extends SmartView {
   restoreHandlers() {
     this._setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setDeleteClickHandler(this._callback.deleteClick);
   }
 
   _setInnerHandlers() {
@@ -292,6 +298,16 @@ export default class EditEvent extends SmartView {
   setFormSubmitHandler(callback) {
     this._callback.formSubmit = callback;
     this.getElement().addEventListener(`submit`, this._formSubmitHandler);
+  }
+
+  _formDeleteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.deleteClick(EditEvent.parseDataToEvent(this._data));
+  }
+
+  setDeleteClickHandler(callback) {
+    this._callback.deleteClick = callback;
+    this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._formDeleteClickHandler);
   }
 
   reset(event) {
