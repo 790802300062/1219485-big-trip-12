@@ -1,78 +1,11 @@
 import {getRandomInteger} from '../utils/common.js';
-import {OPTIONS} from '../const.js';
-
-const TRIP_EVENTS = [
-  {
-    name: `Taxi`,
-    type: `moving`
-  },
-  {
-    name: `Bus`,
-    type: `moving`
-  },
-  {
-    name: `Train`,
-    type: `moving`
-  },
-  {
-    name: `Ship`,
-    type: `moving`
-  },
-  {
-    name: `Transport`,
-    type: `moving`
-  },
-  {
-    name: `Drive`,
-    type: `moving`
-  },
-  {
-    name: `Flight`,
-    type: `moving`
-  },
-  {
-    name: `Check-in`,
-    type: `arrival`
-  },
-  {
-    name: `Sightseeing`,
-    type: `arrival`
-  },
-  {
-    name: `Restaurant`,
-    type: `arrival`
-  }
-];
-
-const DESTINATION_CITIES = [
-  `London`,
-  `Paris`,
-  `New York`,
-  `Berlin`,
-  `Amsterdam`,
-  `Tokyo`,
-  `Bangkok`,
-  `Madrid`,
-  `Rome`,
-  `Moscow`,
-  `Barcelona`,
-  `Prague`
-];
+import {generateDescription, generatePhotos} from '../utils/event.js';
+import {OPTIONS, TRIP_EVENTS, DESTINATION_CITIES} from '../const.js';
 
 const EventPrice = {
   MIN: 5,
   MAX: 500
 };
-
-const DESCRIPTION = `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                     Cras aliquet varius magna, non porta ligula feugiat eget.
-                     Fusce tristique felis at fermentum pharetra.
-                     Aliquam id orci ut lectus varius viverra.
-                     Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.
-                     Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum.
-                     Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui.
-                     Sed sed nisi sed augue convallis suscipit in sed felis. Aliquam erat volutpat.
-                     Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.`;
 
 const DAY_GAP = 15;
 
@@ -85,13 +18,6 @@ const OptionAmount = {
   MIN: 0,
   MAX: 4
 };
-
-const PhotoAmount = {
-  MIN: 1,
-  MAX: 10
-};
-
-const MAX_DESCRIPTION_SENTENCE_AMOUNT = 4;
 
 const generateOptions = (eventType) => {
   const additionalOptions = Array.from(new Set());
@@ -113,17 +39,6 @@ const generateEventType = () => {
   const randomIndex = getRandomInteger(0, TRIP_EVENTS.length - 1);
 
   return TRIP_EVENTS[randomIndex];
-};
-
-const destinationDescription = () => {
-  const sentences = DESCRIPTION.split(`.`);
-  let text = ``;
-
-  for (let i = 0; i < getRandomInteger(0, MAX_DESCRIPTION_SENTENCE_AMOUNT); i++) {
-    text += sentences[getRandomInteger(0, sentences.length - 1)] + `. `;
-  }
-
-  return text;
 };
 
 const generateDestinationCity = () => {
@@ -148,16 +63,7 @@ const generateStartDate = () => {
   return new Date(+min + Math.random() * (max - min));
 };
 
-const generatePhotos = () => {
-  const photos = [];
-
-  for (let i = 0; i < getRandomInteger(PhotoAmount.MIN, PhotoAmount.MAX); i++) {
-    photos.push(`http://picsum.photos/248/152?r=${Math.random()}`);
-  }
-
-  return photos;
-};
-
+const generateId = () => Date.now() + parseInt(Math.random() * 10000, 10);
 
 export const generateEvent = () => {
   return {
@@ -166,10 +72,12 @@ export const generateEvent = () => {
     startDate: generateStartDate(DAY_GAP),
     duration: generateDuration(),
     price: getRandomInteger(EventPrice.MIN, EventPrice.MAX),
-    options: generateOptions(`moving`),
+    options: generateOptions(`transfer`),
+    isFavorite: Boolean(getRandomInteger(0, 1)),
     destination: {
-      description: destinationDescription(),
+      description: generateDescription(),
       photo: generatePhotos()
-    }
+    },
+    id: generateId()
   };
 };

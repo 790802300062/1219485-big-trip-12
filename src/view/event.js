@@ -2,7 +2,7 @@ import AbstractView from "../view/abstract.js";
 import {getEndTime} from '../utils/event.js';
 import {getTimeInHours} from '../utils/common.js';
 
-const EVENT_TYPE_NAME = `arrival`;
+const EVENT_TYPE_NAME = `activity`;
 const MAX_VISIT_OPTION_AMOUNT = 3;
 
 const createEventTemplate = (currentEvent) => {

@@ -3,57 +3,28 @@ import {getTimeInHours} from '../utils/common.js';
 
 const MONTHS_NAMES = [`Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec`];
 
-export const createDayTemplate = (events) => {
+const createDayTemplate = (date, count) => {
+  let month = MONTHS_NAMES[date.getMonth()];
+  let day = getTimeInHours(date.getDate());
 
-  const generateDate = () => {
-    const datesContainer = [];
-    for (let event of events) {
-      let newDate = new Date(event.startDate);
-      newDate = newDate.setHours(23, 59, 59, 999);
-      if (!datesContainer.includes(newDate)) {
-        datesContainer.push(newDate);
-      }
-    }
-    return datesContainer;
-  };
-
-  const generateDaysTemplate = () => {
-    const days = generateDate();
-    let daysList = ``;
-    let dayCounter = 1;
-    for (let day of days) {
-      let currentDate = new Date(day);
-      let month = MONTHS_NAMES[currentDate.getMonth()];
-      let date = getTimeInHours(currentDate.getDate());
-      daysList += `<li class="trip-days__item  day">
-          <div class="day__info">
-            <span class="day__counter">${dayCounter}</span>
-                <time class="day__date" datetime="2019-${month}-${date}">${month + ` ` + date}</time>
-          </div>
-          <ul class="trip-events__list">
-          </ul>
-        </li>`;
-      dayCounter++;
-    }
-    return daysList;
-  };
-
-  const daysTemplate = generateDaysTemplate();
-
-  return (
-    `<ul class="trip-days">
-        ${daysTemplate}
-    </ul>`
+  return (`
+    <li class="trip-days__item  day">
+      <div class="day__info">
+        <span class="day__counter">${count}</span>
+        <time class="day__date" datetime="2019-${month}-${day}">${month + ` ` + day}</time>
+      </div>
+    </li>`
   );
 };
 
 export default class DayBlock extends AbstractView {
-  constructor(event) {
+  constructor(day, count) {
     super();
-    this._event = event;
+    this._day = day;
+    this._count = count;
   }
 
   getTemplate() {
-    return createDayTemplate(this._event);
+    return createDayTemplate(this._day, this._count);
   }
 }

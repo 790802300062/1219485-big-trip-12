@@ -5,11 +5,11 @@ import TripPresenter from "./presenter/trip.js";
 import EventMessageView from "./view/event-message.js";
 import {generateEvent} from "./mock/event.js";
 import {render, RenderPosition, remove} from "./utils/render.js";
-import {EventMessage} from "./const.js";
 
-const EVENTS_AMOUNT = 0;
+const EVENTS_AMOUNT = 25;
 
 const events = new Array(EVENTS_AMOUNT).fill().map(generateEvent);
+console.log(events);
 
 events.sort((a, b) => {
   const dateA = new Date(a.startDate);
@@ -27,22 +27,5 @@ render(tripControlElement, new MenuControlsView(), RenderPosition.AFTEREND);
 
 const tripEventsElement = document.querySelector(`.trip-events`);
 const tripPresenter = new TripPresenter(tripEventsElement);
+
 tripPresenter.init(events);
-
-if (!events.length) {
-  remove(TripInfoView());
-  render(tripEventsElement, new EventMessageView(EventMessage.NO_EVENTS), RenderPosition.BEFOREEND);
-}
-
-
-
-
-/*  const onEscKeyDown = (evt) => {
-  if (!evt.key === Key.ENTER || evt.key === Key.ESCAPE) {
-    return
-  };
-
-  evt.preventDefault();
-  replaceFormToEvent();
-  document.removeEventListener(`keydown`, onEscKeyDown);
-}*/

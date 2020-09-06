@@ -2,44 +2,103 @@ export const OPTIONS = [
   {
     name: `Add luggage`,
     price: 30,
-    eventType: `moving`
+    eventType: `transfer`
   },
   {
     name: `Switch to business class`,
     price: 100,
-    eventType: `moving`
+    eventType: `transfer`
   },
   {
     name: `Switch to first class`,
     price: 200,
-    eventType: `moving`
+    eventType: `transfer`
   },
   {
     name: `Add meal`,
     price: 15,
-    eventType: `moving`
+    eventType: `transfer`
   },
   {
     name: `Choose seats`,
     price: 5,
-    eventType: `moving`
+    eventType: `transfer`
   },
   {
     name: `Travel by train`,
     price: 40,
-    eventType: `moving`
+    eventType: `transfer`
   },
   {
     name: `Book tickets`,
     price: 40,
-    eventType: `arrival`
+    eventType: `activity`
   },
   {
     name: `Lunch in city`,
     price: 30,
-    eventType: `arrival`
+    eventType: `activity`
   }
 ];
+
+export const TRIP_EVENTS = [
+  {
+    name: `Taxi`,
+    type: `transfer`
+  },
+  {
+    name: `Bus`,
+    type: `transfer`
+  },
+  {
+    name: `Train`,
+    type: `transfer`
+  },
+  {
+    name: `Ship`,
+    type: `transfer`
+  },
+  {
+    name: `Transport`,
+    type: `transfer`
+  },
+  {
+    name: `Drive`,
+    type: `transfer`
+  },
+  {
+    name: `Flight`,
+    type: `transfer`
+  },
+  {
+    name: `Check-in`,
+    type: `activity`
+  },
+  {
+    name: `Sightseeing`,
+    type: `activity`
+  },
+  {
+    name: `Restaurant`,
+    type: `activity`
+  }
+];
+
+export const DESTINATION_CITIES = [
+  `London`,
+  `Paris`,
+  `New York`,
+  `Berlin`,
+  `Amsterdam`,
+  `Tokyo`,
+  `Bangkok`,
+  `Madrid`,
+  `Rome`,
+  `Moscow`,
+  `Barcelona`,
+  `Prague`
+];
+
 
 export const Key = {
   ENTER: `Enter`,
