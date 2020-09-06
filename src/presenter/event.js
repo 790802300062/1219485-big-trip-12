@@ -102,22 +102,22 @@ export default class Event {
 
   _handleFormSubmit(event) {
     this._changeData(
-      UserAction.UPDATE_EVENT,
-      UpdateType.MINOR,
-      event
+        UserAction.UPDATE_EVENT,
+        UpdateType.MINOR,
+        event
     );
     this._replaceFormToEvent();
   }
 
   _handleFavoriteClick() {
     this._changeData(
-      UserAction.UPDATE_EVENT,
-      UpdateType.PATCH,
-      Object.assign(
-          {},
-          this._event,
-          {isFavorite: !this._event.isFavorite}
-      )
+        UserAction.UPDATE_EVENT,
+        UpdateType.PATCH,
+        Object.assign(
+            {},
+            this._event,
+            {isFavorite: !this._event.isFavorite}
+        )
     );
   }
 }

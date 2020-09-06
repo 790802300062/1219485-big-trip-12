@@ -10,7 +10,6 @@ import {render, RenderPosition} from "./utils/render.js";
 const EVENTS_AMOUNT = 25;
 
 const events = new Array(EVENTS_AMOUNT).fill().map(generateEvent);
-console.log(events);
 
 events.sort((a, b) => {
   const dateA = new Date(a.startDate);

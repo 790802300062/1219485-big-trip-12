@@ -71,19 +71,19 @@ export default class Trip {
     dates.forEach((day, count) => {
       const dayElement = new DayView(new Date(day), ++count);
       this._dayList.push(dayElement);
-      render(this._tripContainer, dayElem, RenderPosition.BEFOREEND);
+      render(this._tripContainer, dayElement, RenderPosition.BEFOREEND);
 
       const eventsListContainer = new EventsListContainerView();
       render(dayElement, eventsListContainer, RenderPosition.BEFOREEND);
 
       const dateEventsList = createDateEventsList(this._getEvents(), new Date(day));
-      this._renderEventsList(eventsListContainer, dateEvensList);
-        this._renderEvent(eventsListContainer, event);
+      this._renderEventsList(eventsListContainer, dateEventsList);
+      this._renderEvent(eventsListContainer, event);
     });
   }
 
-  _renderEventsList(eventsListContainer, dateEvensList) {
-    for (let event of dateEvensList) {
+  _renderEventsList(eventsListContainer, dateEventsList) {
+    for (let event of dateEventsList) {
       this._renderEvent(eventsListContainer, event);
     }
   }
@@ -135,15 +135,15 @@ export default class Trip {
     Object
       .values(this._eventPresenter)
       .forEach((presenter) => presenter.destroy());
-      this._eventPresenter = {};
-      for (let day of this._dayList) {
-        remove(day);
-        day.removeElement();
-      }
-      this._dayList = [];
-      remove(this._sortComponent);
-      remove(this._startComponent);
-      this._eventNewPresenter.destroy();
+    this._eventPresenter = {};
+    for (let day of this._dayList) {
+      remove(day);
+      day.removeElement();
+    }
+    this._dayList = [];
+    remove(this._sortComponent);
+    remove(this._startComponent);
+    this._eventNewPresenter.destroy();
   }
 }
 
