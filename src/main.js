@@ -1,42 +1,45 @@
-import MenuControlsView from "./view/site-menu.js";
-import TripInfoView from "./view/trip-info.js";
-import EventsModel from "./model/events.js";
-import FilterModel from "./model/filter.js";
-import TripPresenter from "./presenter/trip.js";
-import FilterPresenter from "./presenter/filter.js";
-import {generateEvent} from "./mock/event.js";
-import {render, RenderPosition} from "./utils/render.js";
+import {render, RenderPosition} from './utils/render.js';
+import {generateEvent} from './mock/event.js';
+import {generateDestinationCitiesDescription} from './mock/utils.js';
+import {getTripRoute, calculateTotalTripCost} from './utils/common.js';
+
+import TripInfo from './view/trip-info.js';
+import NewEventButton from './view/new-event-button.js';
+import TripRoute from './view/trip-route.js';
+import TripCost from './view/trip-cost.js';
+import Menu from './view/menu.js';
+import Filters from './view/filters.js';
+import TripPresenter from './presenter/trip';
 
 const EVENTS_AMOUNT = 25;
 
-const events = new Array(EVENTS_AMOUNT).fill().map(generateEvent);
+const tripInfoPosition = document.querySelector(`.trip-main`);
+const menuPosition = tripInfoPosition.querySelector(`.menu-position`);
+const filtersPosition = tripInfoPosition.querySelector(`.trip-controls`);
+const eventsContainerPosition = document.querySelector(`.trip-events`);
 
-events.sort((a, b) => {
-  const dateA = new Date(a.startDate);
-  const dateB = new Date(b.startDate);
+let date = new Date();
 
-  return dateA - dateB;
-});
+const events = new Array(EVENTS_AMOUNT)
+  .fill()
+  .map(() => {
+    let event = generateEvent(date);
+    date = event.endTime;
 
-const eventsModel = new EventsModel();
-eventsModel.setEvents(events);
+    return event;
+  });
 
-const filterModel = new FilterModel();
+const destinations = generateDestinationCitiesDescription();
+const tripInfo = new TripInfo().getElement();
 
-const tripMainElement = document.querySelector(`.trip-main`);
-render(tripMainElement, new TripInfoView(), RenderPosition.AFTERBEGIN);
+render(tripInfoPosition, tripInfo, RenderPosition.AFTERBEGIN);
+render(tripInfoPosition, new NewEventButton().getElement(), RenderPosition.BEFOREEND);
 
-const tripControlElement = tripMainElement.querySelector(`.trip-main__trip-controls`);
-render(tripControlElement, new MenuControlsView(), RenderPosition.BEFOREEND);
+render(tripInfoPosition, new TripRoute(getTripRoute(events)).getElement(), RenderPosition.BEFOREEND);
+render(tripInfoPosition, new TripCost(calculateTotalTripCost(events)).getElement(), RenderPosition.BEFOREEND);
 
-const tripEventsElement = document.querySelector(`.trip-events`);
-const tripPresenter = new TripPresenter(tripEventsElement, eventsModel, filterModel);
-const filterPresenter = new FilterPresenter(tripControlElement, filterModel, eventsModel);
+render(menuPosition, new Menu().getElement(), RenderPosition.AFTEREND);
+render(filtersPosition, new Filters().getElement(), RenderPosition.BEFOREEND);
 
-tripPresenter.init();
-filterPresenter.init();
-
-document.querySelector(`.trip-main__event-add-btn`).addEventListener(`click`, (evt) => {
-  evt.preventDefault();
-  tripPresenter.createEvent();
-});
+const tripPresenter = new TripPresenter(eventsContainerPosition, destinations);
+tripPresenter.init(events);

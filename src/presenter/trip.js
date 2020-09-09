@@ -1,149 +1,178 @@
-import DayView from "../view/day-block.js";
-import SortView from "../view/sort.js";
-import StartView from "../view/start.js";
-import EventsListContainerView from "../view/events-list.js";
-import EventPresenter from "./event.js";
-import EventNewPresenter from "./event-new.js";
-import {filter} from "../utils/filter.js";
-import {render, RenderPosition, remove} from "../utils/render.js";
-import {UpdateType, UserAction, FilterType} from "../const.js";
-import {createDates, createDateEventsList} from '../utils/event.js';
+import {formatDayDate} from '../utils/time-and-date.js';
+import {SortType} from '../const.js';
+import {
+  render,
+  RenderPosition,
+  remove
+} from '../utils/render.js';
 
+import {
+  sortItemsByID,
+  sortEventsByPrice,
+  sortEventsByTime
+} from '../utils/common.js';
 
-export default class Trip {
-  constructor(tripContainer, eventsModel, filterModel) {
-    this._tripContainer = tripContainer;
-    this._eventsModel = eventsModel;
-    this._filterModel = filterModel;
+import EventMessage from '../view/event-message.js';
+import Sort from '../view/sort.js';
+import DaysContainer from '../view/days-container.js';
+import DayView from '../view/day.js';
+import EventList from '../view/event-list.js';
+import EventPresenter from './event.js';
+
+const BLANK_PAGE_MESSAGE = `Click New Event to create your first point`;
+const UNGROUPED_LIST = 0;
+
+const reduceEventsByDay = (days, event) => {
+  const dayDate = formatDayDate(event.startTime);
+
+  if (Array.isArray(days[dayDate])) {
+    days[dayDate].push(event);
+  } else {
+    days[dayDate] = [event];
+  }
+
+  return days;
+};
+
+const groupEventsByDays = (events) => events
+  .sort((less, more) => less.startTime - more.startTime)
+  .reduce(reduceEventsByDay, {});
+
+export default class TripPresenter {
+  constructor(container, destinations) {
+    this._container = container;
+    this._destinations = destinations;
+
+    this._events = [];
+    this._unsortedEvents = [];
     this._eventPresenter = {};
-    this._dayList = [];
+    this._currentSortType = SortType.EVENT;
+    this._days = [];
 
-    this._sortComponent = new SortView();
-    this._startComponent = new StartView();
+    this._eventMessage = new EventMessage(BLANK_PAGE_MESSAGE);
+    this._sort = new Sort();
+    this._daysView = new DaysContainer();
 
+    this._handleEventChange = this._handleEventChange.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
-
-    this._handleViewAction = this._handleViewAction.bind(this);
-    this._handleModelEvent = this._handleModelEvent.bind(this);
-
-    this._eventsModel.addObserver(this._handleModelEvent);
-    this._filterModel.addObserver(this._handleModelEvent);
-
-    this._eventNewPresenter = new EventNewPresenter(this._tripContainer, this._handleViewAction);
   }
 
-  init() {
-    this._renderTripBoard(this._getEvents());
-  }
+  init(events) {
+    this._events = [...events];
+    this._unsortedEvents = [...events];
 
-  createEvent() {
-    this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
-    this._eventNewPresenter.init();
-  }
-
-  _getEvents() {
-    const filterType = this._filterModel.getFilter();
-    const events = this._eventsModel.getEvents();
-    const filtredEvents = filter[filterType](events);
-    return filtredEvents;
-  }
-
-  _renderStart() {
-    render(this._tripContainer, this._startComponent, RenderPosition.BEFOREEND);
-  }
-
-  _renderSort() {
-    render(this._tripContainer, this._sortComponent, RenderPosition.BEFOREEND);
-  }
-
-  _renderTripBoard() {
-    if (this._getEvents().length === 0) {
-      this._renderStart();
+    if (events.length === 0) {
+      this._renderBlankPageMessage(BLANK_PAGE_MESSAGE);
       return;
     }
 
     this._renderSort();
-    this._renderDayList();
-  }
-
-  _renderDayList() {
-    let dates = createDates(this._getEvents());
-    dates.forEach((day, count) => {
-      const dayElement = new DayView(new Date(day), ++count);
-      this._dayList.push(dayElement);
-      render(this._tripContainer, dayElement, RenderPosition.BEFOREEND);
-
-      const eventsListContainer = new EventsListContainerView();
-      render(dayElement, eventsListContainer, RenderPosition.BEFOREEND);
-
-      const dateEventsList = createDateEventsList(this._getEvents(), new Date(day));
-      this._renderEventsList(eventsListContainer, dateEventsList);
-      this._renderEvent(eventsListContainer, event);
-    });
-  }
-
-  _renderEventsList(eventsListContainer, dateEventsList) {
-    for (let event of dateEventsList) {
-      this._renderEvent(eventsListContainer, event);
-    }
-  }
-
-  _renderEvent(eventListElement, event) {
-    const eventPresenter = new EventPresenter(eventListElement, this._handleViewAction, this._handleModeChange);
-    eventPresenter.init(event);
-    this._eventPresenter[event.id] = eventPresenter;
+    this._sortEvents(this._currentSortType);
+    this._renderDaysList();
   }
 
   _handleModeChange() {
-    this._eventNewPresenter.destroy();
     Object
       .values(this._eventPresenter)
       .forEach((presenter) => presenter.resetView());
   }
 
-  _handleViewAction(actionType, updateType, update) {
-    switch (actionType) {
-      case UserAction.UPDATE_EVENT:
-        this._eventsModel.updateEvent(updateType, update);
-        break;
-      case UserAction.ADD_EVENT:
-        this._eventsModel.addEvent(updateType, update);
-        break;
-      case UserAction.DELETE_EVENT:
-        this._eventsModel.deleteEvent(updateType, update);
-        break;
-    }
+  _handleEventChange(updatedEvent) {
+    this._events = sortItemsByID(this._events, updatedEvent);
+    this._unsortedEvents = sortItemsByID(this._unsortedEvents, updatedEvent);
+    this._eventPresenter[updatedEvent.id].init(updatedEvent);
   }
 
-  _handleModelEvent(updateType, data) {
-    switch (updateType) {
-      case UpdateType.PATCH:
-        this._eventPresenter[data.id].init(data);
+  _sortEvents(sortType) {
+    switch (sortType) {
+      case SortType.PRICE:
+        this._events.sort(sortEventsByPrice);
         break;
-      case UpdateType.MINOR:
-        this._clearTrip();
-        this._renderTripBoard();
+      case SortType.TIME:
+        this._events.sort(sortEventsByTime);
         break;
-      case UpdateType.MAJOR:
-        this._clearTrip({resetSortType: true});
-        this._renderTripBoard();
-        break;
+      default:
+        this._events = [...this._unsortedEvents];
     }
+
+    this._currentSortType = sortType;
   }
 
-  _clearTrip() {
+  _renderSort() {
+    const handleSortChange = (sortType) => {
+      if (this._currentSortType === sortType) {
+        return;
+      }
+
+      this._sortEvents(sortType);
+      remove(this._daysView);
+      this._renderDaysList();
+
+    };
+
+    this._sort.setChangeHandler(handleSortChange);
+
+    render(this._container, this._sort, RenderPosition.BEFOREEND);
+  }
+
+  _renderBlankPageMessage() {
+    render(this._container, this._eventMessage, RenderPosition.BEFOREEND);
+  }
+
+  _clearPointList() {
     Object
       .values(this._eventPresenter)
       .forEach((presenter) => presenter.destroy());
     this._eventPresenter = {};
-    for (let day of this._dayList) {
-      remove(day);
-      day.removeElement();
+
+    this._days.forEach(remove);
+    this._days = [];
+
+    remove(this._daysView);
+  }
+
+  _renderDaysList() {
+    render(this._container, this._daysView, RenderPosition.BEFOREEND);
+    this._renderDays();
+  }
+
+  _renderDays() {
+    if (this._currentSortType === SortType.EVENT) {
+      const days = groupEventsByDays(this._events);
+
+      Object
+        .values(days)
+        .forEach((dayEvents, counter) => {
+          const dayView = new DayView(new Date(dayEvents[0].startTime), counter + 1);
+          this._days.push(dayView);
+
+          render(this._daysView, dayView, RenderPosition.BEFOREEND);
+          this._renderEventsList(dayView, dayEvents);
+        });
+
+    } else {
+
+      const dayView = new DayView(new Date(), UNGROUPED_LIST);
+
+      this._days.push(dayView);
+
+      render(this._daysView, dayView, RenderPosition.BEFOREEND);
+      this._renderEventsList(dayView, this._events);
     }
-    this._dayList = [];
-    remove(this._sortComponent);
-    remove(this._startComponent);
-    this._eventNewPresenter.destroy();
+  }
+
+  _renderEventsList(dayView, dayEvents) {
+    const eventListView = new EventList();
+    render(dayView, eventListView, RenderPosition.BEFOREEND);
+    this._renderEvents(eventListView, dayEvents);
+  }
+
+  _renderEvents(eventListView, dayEvents) {
+    dayEvents.forEach((event) => {
+      const eventPresenter = new EventPresenter(eventListView, this._destinations, this._handleEventChange, this._handleModeChange);
+      eventPresenter.init(event);
+
+      this._eventPresenter[event.id] = eventPresenter;
+    });
   }
 }
-

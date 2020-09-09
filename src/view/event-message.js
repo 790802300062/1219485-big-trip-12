@@ -1,16 +1,14 @@
-import AbstractView from "./abstract.js";
+import Abstract from "./abstract";
 
-const createEventMessageTemplate = (message) => (
-  `<p class="trip-events__msg">${message}</p>`
-);
+const createEventMessageTemplate = (message) => `<p class="trip-events__msg">${message}</p>`;
 
-export default class EventMessage extends AbstractView {
+export default class EventMessage extends Abstract {
   constructor(message) {
     super();
     this._message = message;
   }
 
-  getTemplate() {
+  _getTemplate() {
     return createEventMessageTemplate(this._message);
   }
 }

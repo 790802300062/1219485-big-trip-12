@@ -1,90 +1,66 @@
-import AbstractView from "../view/abstract.js";
-import {getEndTime} from '../utils/event.js';
-import {getTimeInHours} from '../utils/common.js';
+import {EventTypeWithPreposition} from '../const.js';
+import {
+  formatWholeDate,
+  formatTimeToString,
+  getDatesDifference
+} from '../utils/time-and-date.js';
 
-const EVENT_TYPE_NAME = `activity`;
-const MAX_VISIT_OPTION_AMOUNT = 3;
+import Abstract from './abstract';
 
-const createEventTemplate = (currentEvent) => {
-  const {event, destinationCity, startDate, duration, price, options} = currentEvent;
+const formatEventTitle = (event) => `${EventTypeWithPreposition[event.type]} ${event.destination.name}`;
 
-  const preposition = event.type === EVENT_TYPE_NAME
-    ? `in`
-    : `to`;
-
-  const createOptionTemplate = () => {
-    let optionList = ``;
-    if (options.length > 0) {
-      for (let option of options.slice(0, MAX_VISIT_OPTION_AMOUNT)) {
-        optionList += `<li class="event__offer">
-          <span class="event__offer-title">${option.name}</span>
-          &plus; &euro; &nbsp;<span class="event__offer-price">${option.price}</span>
-          </li>`;
-      }
-    }
-
-    return optionList;
-  };
-
-  const optionTemplate = createOptionTemplate(options);
-
-  const endDate = getEndTime(startDate, duration);
-
-  return (
-    `<li class="trip-events__item">
+const createEventTemplate = (event) => {
+  return `
+    <li class="trip-events__item">
       <div class="event">
         <div class="event__type">
-          <img class="event__type-icon" width="42" height="42" src="img/icons/${event.name.toLowerCase()}.png" alt="Event type icon">
+          <img class="event__type-icon" width="42" height="42" src="img/icons/${event.type}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">${event.name} ${preposition} ${destinationCity}</h3>
+        <h3 class="event__title">${formatEventTitle(event)}</h3>
 
         <div class="event__schedule">
           <p class="event__time">
-            <time class="event__start-time" datetime="">
-              ${getTimeInHours(startDate.getHours())}:${getTimeInHours(startDate.getMinutes())}
-             </time>
+            <time class="event__start-time" datetime="${formatWholeDate(event.startTime)}">${formatTimeToString(event.startTime)}</time>
             &mdash;
-            <time class="event__end-time" datetime="">
-            ${getTimeInHours(endDate.getHours())}:${getTimeInHours(endDate.getMinutes())}
-            </time>
-          </p>
-          <p class="event__duration">${duration.hour}H ${duration.minute}M</p>
+            <time class="event__end-time" datetime="${formatWholeDate(event.endTime)}">${formatTimeToString(event.endTime)}</time>
+            </p>
+          <p class="event__duration">${getDatesDifference(event.startTime, event.endTime)}</p>
         </div>
 
         <p class="event__price">
-          &euro;&nbsp;<span class="event__price-value">${price}</span>
+          &euro;&nbsp;<span class="event__price-value">${event.price}</span>
         </p>
 
-        <h4 class="visually-hidden">Offers:</h4>
-        <ul class="event__selected-offers">
-          ${optionTemplate}
-        </ul>
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
         </button>
       </div>
-    </li>`
-  );
+    </li>`;
 };
 
-export default class Event extends AbstractView {
+export default class Event extends Abstract {
   constructor(event) {
     super();
     this._event = event;
-    this._eventClickHandler = this._eventClickHandler.bind(this);
+    this._onRollupButtonClick = this._onRollupButtonClick.bind(this);
   }
 
-  getTemplate() {
-    return createEventTemplate(this._event);
+  _getTemplate() {
+    return createEventTemplate(this._point);
   }
 
-  _eventClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.eventClick();
+  getContainer() {
+    return this.getElement().querySelector(`.event__price`);
   }
 
-  setEventClickHandler(callback) {
-    this._callback.eventClick = callback;
-    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._eventClickHandler);
+  _onRollupButtonClick() {
+    this._callback.rollupButtonClick();
+  }
+
+  setRollupButtonClickHandler(callback) {
+    this._callback.rollupButtonClick = callback;
+    this.getElement()
+      .querySelector(`.event__rollup-btn`)
+      .addEventListener(`click`, this._onRollupButtonClick);
   }
 }
