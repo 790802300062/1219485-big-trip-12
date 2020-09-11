@@ -1,8 +1,8 @@
 import {EventTypeWithPreposition} from '../const.js';
 import {
   formatWholeDate,
-  formatTimeToString,
-  getDatesDifference
+  formatTime,
+  calculateTimeDifference
 } from '../utils/time-and-date.js';
 
 import Abstract from './abstract';
@@ -10,8 +10,7 @@ import Abstract from './abstract';
 const formatEventTitle = (event) => `${EventTypeWithPreposition[event.type]} ${event.destination.name}`;
 
 const createEventTemplate = (event) => {
-  return `
-    <li class="trip-events__item">
+  return (`<li class="trip-events__item">
       <div class="event">
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${event.type}.png" alt="Event type icon">
@@ -20,11 +19,11 @@ const createEventTemplate = (event) => {
 
         <div class="event__schedule">
           <p class="event__time">
-            <time class="event__start-time" datetime="${formatWholeDate(event.startTime)}">${formatTimeToString(event.startTime)}</time>
+            <time class="event__start-time" datetime="${formatWholeDate(event.startTime)}">${formatTime(event.startTime)}</time>
             &mdash;
-            <time class="event__end-time" datetime="${formatWholeDate(event.endTime)}">${formatTimeToString(event.endTime)}</time>
+            <time class="event__end-time" datetime="${formatWholeDate(event.endTime)}">${formatTime(event.endTime)}</time>
             </p>
-          <p class="event__duration">${getDatesDifference(event.startTime, event.endTime)}</p>
+          <p class="event__duration">${calculateTimeDifference(event.startTime, event.endTime)}</p>
         </div>
 
         <p class="event__price">
@@ -35,7 +34,8 @@ const createEventTemplate = (event) => {
           <span class="visually-hidden">Open event</span>
         </button>
       </div>
-    </li>`;
+    </li>`
+  );
 };
 
 export default class Event extends Abstract {
@@ -46,7 +46,7 @@ export default class Event extends Abstract {
   }
 
   _getTemplate() {
-    return createEventTemplate(this._point);
+    return createEventTemplate(this._event);
   }
 
   getContainer() {

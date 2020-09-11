@@ -1,4 +1,4 @@
-import {formatDayDate} from '../utils/time-and-date.js';
+import {formatDate} from '../utils/time-and-date.js';
 import {SortType} from '../const.js';
 import {
   render,
@@ -23,7 +23,7 @@ const BLANK_PAGE_MESSAGE = `Click New Event to create your first point`;
 const UNGROUPED_LIST = 0;
 
 const reduceEventsByDay = (days, event) => {
-  const dayDate = formatDayDate(event.startTime);
+  const dayDate = formatDate(event.startTime);
 
   if (Array.isArray(days[dayDate])) {
     days[dayDate].push(event);

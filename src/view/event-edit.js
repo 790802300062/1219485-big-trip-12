@@ -6,7 +6,9 @@ import {
 } from '../const.js';
 
 import {makeFirstLetterToUpperCase} from '../utils/common.js';
-import {formatDateToString} from '../utils/time-and-date.js';
+import {formatDateAndTime} from '../utils/time-and-date.js';
+import flatpickr from "flatpickr";
+import "../../node_modules/flatpickr/dist/flatpickr.min.css";
 
 import Smart from './smart.js';
 
@@ -33,8 +35,7 @@ const createOptionsListTemplate = (destinations) => {
 };
 
 const createPhotoContainerTemplate = (eventData) => {
-  return `
-    <section class="event__section  event__section--destination">
+  return (`<section class="event__section  event__section--destination">
       <h3 class="event__section-title  event__section-title--destination">Destination</h3>
       <p class="event__destination-description">${eventData.destination.description}</p>
 
@@ -45,7 +46,8 @@ const createPhotoContainerTemplate = (eventData) => {
 
         </div>
       </div>
-    </section>`;
+    </section>`
+  );
 };
 
 const createPhotoListTemplate = (eventData) =>
@@ -55,18 +57,17 @@ const createPhotoListTemplate = (eventData) =>
 const createEventListTemplate = (eventData, eventTypes) => {
   return (
     eventTypes.map((eventType) => {
-      return `
-        <div class="event__type-item">
+      return (`<div class="event__type-item">
           <input id="event-type-${eventType}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${eventType}" ${eventData.type === eventType ? `checked` : ``}>
           <label class="event__type-label  event__type-label--${eventType}" for="event-type-${eventType}-1">${makeFirstLetterToUpperCase(eventType)}</label>
-        </div>`;
+        </div>`
+      );
     }).join(``)
   );
 };
 
 const createOfferContainerTemplate = (eventData) => {
-  return `
-    <section class="event__details">
+  return (`<section class="event__details">
       <section class="event__section  event__section--offers">
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
@@ -76,7 +77,8 @@ const createOfferContainerTemplate = (eventData) => {
 
         </div>
       </section>
-    </section>`;
+    </section>`
+  );
 };
 
 const createOfferListTemplate = (eventData) => {
@@ -89,7 +91,8 @@ const createOfferListTemplate = (eventData) => {
           +
           €&nbsp;<span class="event__offer-price">${key[1].price}</span>
         </label>
-      </div>`);
+      </div>`
+      );
     }).join(``)
   );
 };
@@ -97,8 +100,7 @@ const createOfferListTemplate = (eventData) => {
 const createEventFormTemplate = (eventData, destinations) => {
   const optionsListTemplate = createOptionsListTemplate(destinations);
 
-  return `
-    <li class="trip-events__item">
+  return (`<li class="trip-events__item">
       <form class="event  event--edit" action="#" method="post">
         <header class="event__header">
           <div class="event__type-wrapper">
@@ -139,12 +141,12 @@ const createEventFormTemplate = (eventData, destinations) => {
             <label class="visually-hidden" for="event-start-time-1">
               From
             </label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${formatDateToString(eventData.startTime)}">
+            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${formatDateAndTime(eventData.startTime)}">
             —
             <label class="visually-hidden" for="event-end-time-1">
               To
             </label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${formatDateToString(eventData.endTime)}">
+            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${formatDateAndTime(eventData.endTime)}">
           </div>
 
           <div class="event__field-group  event__field-group--price">
@@ -152,7 +154,7 @@ const createEventFormTemplate = (eventData, destinations) => {
               <span class="visually-hidden">Price</span>
               €
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${eventData.price}">
+            <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${eventData.price}">
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -171,12 +173,13 @@ const createEventFormTemplate = (eventData, destinations) => {
           </button>
         </header>
 
-        ${event.offers.length > 0 ? createOfferContainerTemplate(eventData) : ``}
+        ${eventData.offers.length > 0 ? createOfferContainerTemplate(eventData) : ``}
 
         ${eventData.destination.photos.length > 0 ? createPhotoContainerTemplate(eventData) : ``}
 
         </form>
-      </li>`;
+      </li>`
+  );
 };
 
 export default class EventEdit extends Smart {
@@ -184,6 +187,8 @@ export default class EventEdit extends Smart {
     super();
     this._destinations = destinations;
     this._data = EventEdit.parseEventToData(event);
+    this._startDatepicker = null;
+    this._endDatepicker = null;
 
     this._rollupButtonClickHandler = this._rollupButtonClickHandler.bind(this);
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
@@ -191,7 +196,10 @@ export default class EventEdit extends Smart {
     this._priceChangeHandler = this._priceChangeHandler.bind(this);
     this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
     this._typeListChangeHandler = this._typeListChangeHandler.bind(this);
+    this._startDateChangeHandler = this._startDateChangeHandler.bind(this);
+    this._endDateChangeHandler = this._endDateChangeHandler.bind(this);
     this._setInnerHandlers();
+    this._setDatepicker();
   }
 
   reset(event) {
@@ -206,9 +214,23 @@ export default class EventEdit extends Smart {
 
   restoreHandlers() {
     this._setInnerHandlers();
+    this._setDatepicker();
 
     this.setRollupButtonClickHandler(this._callback.rollupButtonClick);
     this.setFormSubmitHandler(this._callback.formSubmit);
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this._startDatepicker !== null) {
+      this._startDatepicker.destroy();
+      this._startDatepicker = null;
+    }
+    if (this._endDatepicker !== null) {
+      this._endDatepicker.destroy();
+      this._endDatepicker = null;
+    }
   }
 
   _setInnerHandlers() {
@@ -223,6 +245,50 @@ export default class EventEdit extends Smart {
     element.querySelector(`.event__type-list`)
       .addEventListener(`change`, this._typeListChangeHandler);
   }
+
+  _setDatepicker() {
+    if (this._startDatepicker !== null) {
+      this._startDatepicker.destroy();
+      this._startDatepicker = null;
+    }
+    if (this._endDatepicker !== null) {
+      this._endDatepicker.destroy();
+      this._endDatepicker = null;
+    }
+
+    this._startDatepicker = flatpickr(
+        this.getElement().querySelector(`#event-start-time-1`),
+        {
+          'enableTime': true,
+          'time_24hr': true,
+          'dateFormat': `d/m/y H:i`,
+          'defaultDate': this._data.startTime || new Date(),
+          'maxDate': this._data.endTime,
+          'onChange': this._startDateChangeHandler
+        }
+    );
+
+    this._endDatepicker = flatpickr(
+        this.getElement().querySelector(`#event-end-time-1`),
+        {
+          'enableTime': true,
+          'time_24hr': true,
+          'dateFormat': `d/m/y H:i`,
+          'defaultDate': this._data.endTime || new Date(),
+          'minDate': this._data.startTime,
+          'onChange': this._endDateChangeHandler
+        }
+    );
+  }
+
+  _startDateChangeHandler([userDate]) {
+    this.updateData({startTime: userDate}, true);
+  }
+
+  _endDateChangeHandler([userDate]) {
+    this.updateData({endTime: userDate}, true);
+  }
+
 
   _rollupButtonClickHandler() {
     this._callback.rollupButtonClick();
@@ -241,9 +307,7 @@ export default class EventEdit extends Smart {
   }
 
   _priceChangeHandler(evt) {
-    this.updateData({
-      price: evt.target.valueAsNumber,
-    }, true);
+    this.updateData({price: evt.target.valueAsNumber}, true);
   }
 
   _destinationChangeHandler(evt) {
@@ -259,9 +323,7 @@ export default class EventEdit extends Smart {
   }
 
   _typeListChangeHandler(evt) {
-    this.updateData({
-      type: evt.target.value
-    });
+    this.updateData({type: evt.target.value});
   }
 
   setRollupButtonClickHandler(callback) {

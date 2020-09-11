@@ -1,12 +1,12 @@
 import Abstract from './abstract.js';
 
 const createOfferTemplate = (offer) => {
-  return `
-    <li class="event__offer">
+  return (`<li class="event__offer">
       <span class="event__offer-title">${offer.name}</span>
       &plus;
       &euro;&nbsp;<span class="event__offer-price">${offer.price}</span>
-    </li>`;
+    </li>`
+  );
 };
 
 export default class Offer extends Abstract {

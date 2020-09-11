@@ -1,18 +1,18 @@
 import {
   formatWholeDate,
-  formatMonthDate
+  formatMonth
 } from '../utils/time-and-date.js';
 
 import Abstract from './abstract';
 
 const createDayTemplate = (dayDate, counter) => {
-  return `
-    <li class="trip-days__item  day">
+  return (`<li class="trip-days__item  day">
       <div class="day__info">
         ${counter !== 0 ? `<span class="day__counter">${counter}</span>
-        <time class="day__date" datetime="${formatWholeDate(dayDate)}">${formatMonthDate(dayDate)}</time>` : ``}
+        <time class="day__date" datetime="${formatWholeDate(dayDate)}">${formatMonth(dayDate)}</time>` : ``}
       </div>
-    </li>`;
+    </li>`
+  );
 };
 
 export default class DayView extends Abstract {

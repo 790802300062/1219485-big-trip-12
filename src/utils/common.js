@@ -1,12 +1,10 @@
 import {EventKeyCode} from '../const.js';
+import {
+  addZeroInBeginning,
+  formatMonth
+} from './time-and-date.js';
 
-export const makeFirstLetterToUpperCase = (str) => {
-  if (!str) {
-    return str;
-  }
-
-  return str[0].toUpperCase() + str.slice(1);
-};
+export const makeFirstLetterToUpperCase = (string) => string[0].toUpperCase() + string.slice(1);
 
 export const isEscapeEvent = (evt) => {
   return evt.key === EventKeyCode.ESCAPE || evt.key === EventKeyCode.ESC;
@@ -26,14 +24,29 @@ export const getTripRoute = (events) => {
     case 0:
       return ``;
     case 1:
-      return `${events[0].destination}`;
+      return `${events[0].destination.name}`;
     case 2:
-      return `${events[0].destination} &mdash; ${events[events.length - 1].destination}`;
+      return `${events[0].destination.name} &mdash; ${events[events.length - 1].destination.name}`;
     case 3:
-      return `${events[0].destination} &mdash; ${events[1].destination} &mdash; ${events[events.length - 1].destination}`;
+      return `${events[0].destination.name} &mdash; ${events[1].destination.name} &mdash; ${events[events.length - 1].destination.name}`;
     default:
-      return `${events[0].destination} &mdash; ... &mdash; ${events[events.length - 1].destination}`;
+      return `${events[0].destination.name} &mdash; ... &mdash; ${events[events.length - 1].destination.name}`;
   }
+};
+
+export const getTripDuration = (events) => {
+  const startTime = events[0].startTime;
+  const endTime = events[events.length - 1].endTime;
+
+  if (startTime.getMonth() !== endTime.getMonth()) {
+    return `${formatMonth(startTime)}&nbsp;&mdash;&nbsp;${formatMonth(endTime)}`;
+  } else {
+    if (startTime.getDay() !== endTime.getDay()) {
+      return `${formatMonth(startTime)}&nbsp;&mdash;&nbsp;${addZeroInBeginning(endTime.getDay())}`;
+    }
+  }
+
+  return formatMonth(startTime);
 };
 
 export const sortItemsByID = (items, update) => {
