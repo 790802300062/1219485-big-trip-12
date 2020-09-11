@@ -18,7 +18,7 @@ const EVENTS_AMOUNT = 10;
 
 const tripInfoPosition = document.querySelector(`.trip-main`);
 const menuPosition = tripInfoPosition.querySelector(`.menu-position`);
-const filtersPosition = tripInfoPosition.querySelector(`.trip-controls`);
+const filtersPosition = tripInfoPosition.querySelector(`.filters-position`);
 const eventsContainerPosition = document.querySelector(`.trip-events`);
 
 let date = new Date();
@@ -36,13 +36,15 @@ const destinations = generateDestinationCitiesDescription();
 const tripInfo = new TripInfo().getElement();
 
 render(tripInfoPosition, tripInfo, RenderPosition.AFTERBEGIN);
+
+const tripRoutePosition = tripInfoPosition.querySelector(`.trip-main__trip-info`)
+
+render(tripRoutePosition, new TripRoute(getTripRoute(events), getTripDuration(events)).getElement(), RenderPosition.AFTERBEGIN);
+render(tripRoutePosition, new TripCost(calculateTotalTripCost(events)).getElement(), RenderPosition.BEFOREEND);
+render(menuPosition, new Menu().getElement(), RenderPosition.AFTEREND);
+render(filtersPosition, new Filters().getElement(), RenderPosition.AFTEREND);
 render(tripInfoPosition, new NewEventButton().getElement(), RenderPosition.BEFOREEND);
 
-render(tripInfoPosition, new TripRoute(getTripRoute(events), getTripDuration(events)).getElement(), RenderPosition.AFTERBEGIN);
-render(tripInfoPosition, new TripCost(calculateTotalTripCost(events)).getElement(), RenderPosition.BEFOREEND);
-
-render(menuPosition, new Menu().getElement(), RenderPosition.AFTEREND);
-render(filtersPosition, new Filters().getElement(), RenderPosition.BEFOREEND);
-
 const tripPresenter = new TripPresenter(eventsContainerPosition, destinations);
+
 tripPresenter.init(events);
