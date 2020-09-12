@@ -1,48 +1,50 @@
-import MenuControlsView from "./view/site-menu.js";
-import TripInfoView from "./view/trip-info.js";
-import FilterView from "./view/filters.js";
-import TripPresenter from "./presenter/trip.js";
-import EventMessageView from "./view/event-message.js";
-import {generateEvent} from "./mock/event.js";
-import {render, RenderPosition, remove} from "./utils/render.js";
-import {EventMessage} from "./const.js";
+import {render, RenderPosition} from './utils/render.js';
+import {generateEvent} from './mock/event.js';
+import {generateDestinationCitiesDescription} from './mock/utils.js';
+import {getTripRoute,
+  getTripDuration,
+  calculateTotalTripCost
+} from './utils/common.js';
 
-const EVENTS_AMOUNT = 0;
+import TripInfo from './view/trip-info.js';
+import NewEventButton from './view/new-event-button.js';
+import TripRoute from './view/trip-route.js';
+import TripCost from './view/trip-cost.js';
+import Menu from './view/menu.js';
+import Filters from './view/filters.js';
+import TripPresenter from './presenter/trip';
 
-const events = new Array(EVENTS_AMOUNT).fill().map(generateEvent);
+const EVENTS_AMOUNT = 10;
 
-events.sort((a, b) => {
-  const dateA = new Date(a.startDate);
-  const dateB = new Date(b.startDate);
-  return dateA - dateB;
-});
+const tripInfoPosition = document.querySelector(`.trip-main`);
+const menuPosition = tripInfoPosition.querySelector(`.menu-position`);
+const filtersPosition = tripInfoPosition.querySelector(`.filters-position`);
+const eventsContainerPosition = document.querySelector(`.trip-events`);
 
-const tripMainElement = document.querySelector(`.trip-main`);
-render(tripMainElement, new TripInfoView(), RenderPosition.AFTERBEGIN);
+let date = new Date();
 
-const tripControlElement = tripMainElement.querySelector(`.trip-main__trip-controls`);
+const events = new Array(EVENTS_AMOUNT)
+  .fill()
+  .map(() => {
+    let event = generateEvent(date);
+    date = event.endTime;
 
-render(tripControlElement, new FilterView(), RenderPosition.BEFOREEND);
-render(tripControlElement, new MenuControlsView(), RenderPosition.AFTEREND);
+    return event;
+  });
 
-const tripEventsElement = document.querySelector(`.trip-events`);
-const tripPresenter = new TripPresenter(tripEventsElement);
+const destinations = generateDestinationCitiesDescription();
+const tripInfo = new TripInfo().getElement();
+
+render(tripInfoPosition, tripInfo, RenderPosition.AFTERBEGIN);
+
+const tripRoutePosition = tripInfoPosition.querySelector(`.trip-main__trip-info`)
+
+render(tripRoutePosition, new TripRoute(getTripRoute(events), getTripDuration(events)).getElement(), RenderPosition.AFTERBEGIN);
+render(tripRoutePosition, new TripCost(calculateTotalTripCost(events)).getElement(), RenderPosition.BEFOREEND);
+render(menuPosition, new Menu().getElement(), RenderPosition.AFTEREND);
+render(filtersPosition, new Filters().getElement(), RenderPosition.AFTEREND);
+render(tripInfoPosition, new NewEventButton().getElement(), RenderPosition.BEFOREEND);
+
+const tripPresenter = new TripPresenter(eventsContainerPosition, destinations);
+
 tripPresenter.init(events);
-
-if (!events.length) {
-  remove(TripInfoView());
-  render(tripEventsElement, new EventMessageView(EventMessage.NO_EVENTS), RenderPosition.BEFOREEND);
-}
-
-
-
-
-/*  const onEscKeyDown = (evt) => {
-  if (!evt.key === Key.ENTER || evt.key === Key.ESCAPE) {
-    return
-  };
-
-  evt.preventDefault();
-  replaceFormToEvent();
-  document.removeEventListener(`keydown`, onEscKeyDown);
-}*/
