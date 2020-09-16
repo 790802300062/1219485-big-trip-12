@@ -12,20 +12,6 @@ import "../../node_modules/flatpickr/dist/flatpickr.min.css";
 
 import Smart from './smart.js';
 
-const createBlankEvent = () => ({
-  type: ``,
-  destination: {
-    name: ``,
-    description: ``,
-    photos: []
-  },
-  startTime: new Date(),
-  endTime: new Date(),
-  offers: [],
-  isFavorite: false,
-  price: 0,
-});
-
 const isOfferCheckedForEvent = (offerName, offers) => offers.find((item) => item.type === offerName);
 
 const createOptionsListTemplate = (destinations) => {
@@ -183,7 +169,7 @@ const createEventFormTemplate = (eventData, destinations) => {
 };
 
 export default class EventEdit extends Smart {
-  constructor(event = createBlankEvent(), destinations) {
+  constructor(event, destinations) {
     super();
     this._destinations = destinations;
     this._data = EventEdit.parseEventToData(event);
@@ -197,6 +183,7 @@ export default class EventEdit extends Smart {
     this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
     this._typeListChangeHandler = this._typeListChangeHandler.bind(this);
     this._startDateChangeHandler = this._startDateChangeHandler.bind(this);
+    this._resetButtonClickHandler = this._resetButtonClickHandler.bind(this);
     this._endDateChangeHandler = this._endDateChangeHandler.bind(this);
     this._setInnerHandlers();
     this._setDatepicker();
@@ -227,6 +214,7 @@ export default class EventEdit extends Smart {
       this._startDatepicker.destroy();
       this._startDatepicker = null;
     }
+
     if (this._endDatepicker !== null) {
       this._endDatepicker.destroy();
       this._endDatepicker = null;
@@ -242,6 +230,8 @@ export default class EventEdit extends Smart {
       .addEventListener(`change`, this._priceChangeHandler);
     element.querySelector(`.event__input--destination`)
       .addEventListener(`change`, this._destinationChangeHandler);
+    element.querySelector(`.event__reset-btn`)
+      .addEventListener(`click`, this._resetButtonClickHandler);
     element.querySelector(`.event__type-list`)
       .addEventListener(`change`, this._typeListChangeHandler);
   }
@@ -251,6 +241,7 @@ export default class EventEdit extends Smart {
       this._startDatepicker.destroy();
       this._startDatepicker = null;
     }
+
     if (this._endDatepicker !== null) {
       this._endDatepicker.destroy();
       this._endDatepicker = null;
@@ -341,6 +332,14 @@ export default class EventEdit extends Smart {
 
   setFavoriteChangeHandler(callback) {
     this._callback.favoriteChange = callback;
+  }
+
+  setResetButtonClickHandler(callback) {
+    this._callback.resetButtonClick = callback;
+  }
+
+  _resetButtonClickHandler() {
+    this._callback.resetButtonClick();
   }
 
   static parseEventToData(event) {

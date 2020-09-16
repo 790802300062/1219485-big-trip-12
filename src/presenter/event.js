@@ -6,6 +6,11 @@ import {
 } from '../utils/render.js';
 
 import {isEscapeEvent} from '../utils/common.js';
+import {isDatesEqual} from '../utils/time-and-date.js';
+import {
+  UpdateType,
+  UserAction
+} from '../const.js';
 
 import Event from '../view/event.js';
 import EventEdit from '../view/event-edit.js';
@@ -33,8 +38,9 @@ export default class EventPresenter {
     this._handleEventRollupButtonClick = this._handleEventRollupButtonClick.bind(this);
     this._handleEventFormRollupButtonClick = this._handleEventFormRollupButtonClick.bind(this);
     this._handleEventFormSubmit = this._handleEventFormSubmit.bind(this);
-    this._onEscapeKeydown = this._escapeKeydownHandler.bind(this);
+    this._handleResetButtonClick = this._handleResetButtonClick.bind(this);
     this._handleFavoriteChange = this._handleFavoriteChange.bind(this);
+    this._escapeKeydownHandler = this._escapeKeydownHandler.bind(this);
   }
 
   init(event) {
@@ -49,7 +55,7 @@ export default class EventPresenter {
     this._eventComponent.setRollupButtonClickHandler(this._handleEventRollupButtonClick);
     this._eventEditComponent.setRollupButtonClickHandler(this._handleEventFormRollupButtonClick);
     this._eventEditComponent.setFormSubmitHandler(this._handleEventFormSubmit);
-
+    this._eventEditComponent.setResetButtonClickHandler(this._handleResetButtonClick);
     this._eventEditComponent.setFavoriteChangeHandler(this._handleFavoriteChange);
 
     if (event.offers.length > 0) {
@@ -77,6 +83,7 @@ export default class EventPresenter {
   destroy() {
     remove(this._eventComponent);
     remove(this._eventEditComponent);
+    document.removeEventListener(`keydown`, this._escapeKeydownHandler);
   }
 
   resetView() {
@@ -87,6 +94,7 @@ export default class EventPresenter {
 
   _replaceCardToForm() {
     replace(this._eventEditComponent, this._eventComponent);
+    document.addEventListener(`keydown`, this._escapeKeydownHandler);
     this._eventEditComponent.reset(this._event);
     this._changeMode();
     this._mode = Mode.EDITING;
@@ -94,6 +102,7 @@ export default class EventPresenter {
 
   _replaceFormToCard() {
     replace(this._eventComponent, this._eventEditComponent);
+    document.removeEventListener(`keydown`, this._escapeKeydownHandler);
     this._mode = Mode.DEFAULT;
   }
 
@@ -105,25 +114,36 @@ export default class EventPresenter {
 
   _handleEventRollupButtonClick() {
     this._replaceCardToForm();
-    document.addEventListener(`keydown`, this._escapeKeydownHandler);
   }
 
   _handleEventFormRollupButtonClick() {
     this._replaceFormToCard();
-    document.removeEventListener(`keydown`, this._escapeKeydownHandler);
   }
 
   _handleEventFormSubmit(editedEvent) {
-    this._changeData(editedEvent);
+    const isPatchUpdate = isDatesEqual(this._event.startTime, editedEvent.startTime);
+
+    this._changeData(
+        UserAction.UPDATE_EVENT,
+        isPatchUpdate ? UpdateType.PATCH : UpdateType.MINOR,
+        editedEvent);
     this._replaceFormToCard();
   }
 
   _handleFavoriteChange(isFavorite) {
-    this._event = Object.assign(
-        this._event,
-        {isFavorite}
+    this._changeData(
+        UserAction.UPDATE_EVENT,
+        UpdateType.PATCH,
+        Object.assign(this._event, {isFavorite})
     );
-    this._changeData(this._event);
+  }
+
+  _handleResetButtonClick() {
+    this._changeData(
+        UserAction.DELETE_EVENT,
+        UpdateType.MINOR,
+        this._event
+    );
   }
 
   _renderOffersList(offersContainer, offers) {

@@ -1,4 +1,8 @@
-import {EventKeyCode} from '../const.js';
+import {
+  EventKeyCode,
+  FilterType
+} from '../const.js';
+
 import {
   addZeroInBeginning,
   formatMonth
@@ -41,8 +45,8 @@ export const getTripDuration = (events) => {
   if (startTime.getMonth() !== endTime.getMonth()) {
     return `${formatMonth(startTime)}&nbsp;&mdash;&nbsp;${formatMonth(endTime)}`;
   } else {
-    if (startTime.getDay() !== endTime.getDay()) {
-      return `${formatMonth(startTime)}&nbsp;&mdash;&nbsp;${addZeroInBeginning(endTime.getDay())}`;
+    if (startTime.getDate() !== endTime.getDate()) {
+      return `${formatMonth(startTime)}&nbsp;&mdash;&nbsp;${addZeroInBeginning(endTime.getDate())}`;
     }
   }
 
@@ -62,3 +66,10 @@ export const sortItemsByID = (items, update) => {
     ...items.slice(index + 1)
   ];
 };
+
+export const filterTypeToEvents = {
+  [FilterType.EVERYTHING]: (events) => events.slice(),
+  [FilterType.FUTURE]: (events, currentDate) => events.filter((event) => event.startTime > currentDate),
+  [FilterType.PAST]: (events, currentDate) => events.filter((event) => event.startTime <= currentDate)
+};
+

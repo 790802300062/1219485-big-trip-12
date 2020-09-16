@@ -22,3 +22,11 @@ export const calculateTimeDifference = (startDate, endDate) => {
     `${addZeroInBeginning(minutes)}M`}`;
 };
 
+export const isDatesEqual = (firstDate, secondDate) => {
+  if (firstDate === null && secondDate === null) {
+    return true;
+  }
+
+  return moment(firstDate).isSame(secondDate, `day`);
+};
+
