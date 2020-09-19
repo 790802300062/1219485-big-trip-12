@@ -1,49 +1,70 @@
-export const EventKeyCode = {
-  ESCAPE: `Escape`,
-  ESC: `Esc`,
+export const EventCategory = {
+  TRANSFER: `Transfer`,
+  ACTIVITY: `Activity`
 };
 
-export const EventTypeWithPreposition = {
-  'taxi': `Taxi to`,
-  'bus': `Bus to`,
-  'train': `Train to`,
-  'ship': `Ship to`,
-  'transport': `Transport to`,
-  'drive': `Drive to`,
-  'flight': `Flight to`,
-  'check-in': `Check in`,
-  'sightseeing': `Sightseeing in`,
-  'restaurant': `Restaurant in`,
-};
+export const EVENT_TYPES = new Map([
+  [EventCategory.TRANSFER, [
+    `Taxi`,
+    `Bus`,
+    `Train`,
+    `Ship`,
+    `Transport`,
+    `Drive`,
+    `Flight`
+  ]],
+  [EventCategory.ACTIVITY, [
+    `Check-in`,
+    `Sightseeing`,
+    `Restaurant`
+  ]]
+]);
 
-export const ACTIVITY_TYPES = [`taxi`, `bus`, `train`, `ship`, `transport`, `drive`, `flight`];
-export const TRANSFER_TYPES = [`check-in`, `sightseeing`, `restaurant`];
-
-export const AdditionalOfferList = {
-  'luggage': {
-    text: `Add luggage`,
-    price: 30,
-  },
-  'comfort': {
-    text: `Switch to comfort class`,
-    price: 100,
-  },
-  'meal': {
-    text: `Add meal`,
-    price: 15,
-  },
-  'seats': {
-    text: `Choose seats`,
-    price: 5,
-  },
-  'train': {
-    text: `Travel by train`,
-    price: 40,
-  }
+export const FilterType = {
+  EVERYTHING: `everything`,
+  FUTURE: `future`,
+  PAST: `past`
 };
 
 export const SortType = {
+  DEFAULT: `Event`,
+  TIME: `Time`,
+  PRICE: `Price`
+};
+
+export const EventType = {
+  FILTER: `filter`,
   EVENT: `event`,
-  TIME: `time`,
-  PRICE: `price`
+  INIT: `init`
+};
+
+export const UserAction = {
+  UPDATE_EVENT: `UPDATE_EVENT`,
+  ADD_EVENT: `ADD_EVENT`,
+  DELETE_EVENT: `DELETE_EVENT`
+};
+
+export const MenuItem = {
+  TABLE: `Table`,
+  STATS: `Stats`,
+  NEW_EVENT: `New Event`
+};
+
+export const VehicleEmoji = new Map([
+  [`Taxi`, `🚕`],
+  [`Bus`, `🚌`],
+  [`Train`, `🚂`],
+  [`Ship`, `🚢`],
+  [`Transport`, `🚆`],
+  [`Drive`, `🚗`],
+  [`Flight`, `✈️`],
+  [`Check-in`, `🏨`],
+  [`Sightseeing`, `🏛`],
+  [`Restaurant`, `🍴`]
+]);
+
+export const ChartType = {
+  MONEY: `MONEY`,
+  TRANSPORT: `TRANSPORT`,
+  TIME_SPENT: `TIME SPENT`,
 };

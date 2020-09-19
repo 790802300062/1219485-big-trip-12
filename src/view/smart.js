@@ -1,20 +1,20 @@
-import Abstract from "./abstract.js";
+import Abstract from '../view/abstract.js';
 
-export default class Smart extends Abstract {
+export default class SmartView extends Abstract {
   constructor() {
     super();
     this._data = {};
   }
 
-  updateData(update, justDataUpdating) {
-    if (!update) {
+  updateDate(updatedData, justDataUpdating) {
+    if (!updatedData) {
       return;
     }
 
     this._data = Object.assign(
         {},
         this._data,
-        update
+        updatedData
     );
 
     if (justDataUpdating) {
@@ -26,16 +26,18 @@ export default class Smart extends Abstract {
 
   updateElement() {
     let prevElement = this.getElement();
+    const parent = prevElement.parentElement;
     this.removeElement();
+
     const newElement = this.getElement();
 
-    prevElement.replaceWith(newElement);
+    parent.replaceChild(newElement, prevElement);
     prevElement = null;
 
     this.restoreHandlers();
   }
 
   restoreHandlers() {
-    throw new Error(`Abstract method not implemented: resetHandlers`);
+    throw new Error(`Abstract method not implemented`);
   }
 }

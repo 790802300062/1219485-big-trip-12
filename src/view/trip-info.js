@@ -1,13 +1,10 @@
-import Abstract from './abstract';
+import Abstract from '../view/abstract.js';
 
-const createTripInfoTemplate = () => {
-  return (`<section class="trip-main__trip-info  trip-info">
-    </section>`
-  );
-};
+export default class TripInfoView extends Abstract {
 
-export default class TripInfo extends Abstract {
-  _getTemplate() {
-    return createTripInfoTemplate();
+  getTemplate() {
+    return (
+      `<section class="trip-main__trip-info  trip-info"></section>`
+    );
   }
 }

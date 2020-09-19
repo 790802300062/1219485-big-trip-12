@@ -1,64 +1,76 @@
-import {EventKeyCode} from '../const.js';
-import {
-  addZeroInBeginning,
-  formatMonth
-} from './time-and-date.js';
+import {EVENT_TYPES} from '../const.js';
 
-export const makeFirstLetterToUpperCase = (string) => string[0].toUpperCase() + string.slice(1);
+const ESC_KEYCODE = 27;
+const PHOTOS_LIMIT = 5;
 
-export const isEscapeEvent = (evt) => {
-  return evt.key === EventKeyCode.ESCAPE || evt.key === EventKeyCode.ESC;
+const TagName = {
+  INPUT: `INPUT`,
+  LINK: `A`
 };
 
-export const sortEventsByTime = (firstEvent, secondEvent) =>
-  (secondEvent.endTime - secondEvent.startTime) - (firstEvent.endTime - firstEvent.startTime);
+const isTagName = (evt, tag) => evt.target.tagName === tag;
 
-export const sortEventsByPrice = (firstEvent, secondEvent) => secondEvent.price - firstEvent.price;
+export const isInputTag = (evt) => isTagName(evt, TagName.INPUT);
+export const isLinkTag = (evt) => isTagName(evt, TagName.LINK);
 
-export const calculateTotalTripCost = (events) => events.reduce((eventsPrice, event) =>
-  eventsPrice + event.price + event.offers.reduce((offersPrice, offer) =>
-    offersPrice + offer.price, 0), 0);
+export const makeFirstLetterUppercased = (sentence) => sentence[0].toUpperCase() + sentence.slice(1).toLowerCase();
+export const getEventDuration = (event) => event.timeEnd - event.timeStart;
 
-export const getTripRoute = (events) => {
-  switch (events.length) {
-    case 0:
-      return ``;
-    case 1:
-      return `${events[0].destination.name}`;
-    case 2:
-      return `${events[0].destination.name} &mdash; ${events[events.length - 1].destination.name}`;
-    case 3:
-      return `${events[0].destination.name} &mdash; ${events[1].destination.name} &mdash; ${events[events.length - 1].destination.name}`;
-    default:
-      return `${events[0].destination.name} &mdash; ... &mdash; ${events[events.length - 1].destination.name}`;
-  }
-};
-
-export const getTripDuration = (events) => {
-  const startTime = events[0].startTime;
-  const endTime = events[events.length - 1].endTime;
-
-  if (startTime.getMonth() !== endTime.getMonth()) {
-    return `${formatMonth(startTime)}&nbsp;&mdash;&nbsp;${formatMonth(endTime)}`;
-  } else {
-    if (startTime.getDay() !== endTime.getDay()) {
-      return `${formatMonth(startTime)}&nbsp;&mdash;&nbsp;${addZeroInBeginning(endTime.getDay())}`;
-    }
+export const determineEventPreposition = (eventType) => {
+  if (EVENT_TYPES.get(`Activity`).includes(eventType)) {
+    return `${eventType} in`;
   }
 
-  return formatMonth(startTime);
+  return `${eventType} to`;
 };
 
-export const sortItemsByID = (items, update) => {
-  const index = items.findIndex((item) => item.id === update.id);
-
-  if (index === -1) {
-    return items;
-  }
-
-  return [
-    ...items.slice(0, index),
-    update,
-    ...items.slice(index + 1)
-  ];
+const shuffleArray = (arr) => {
+  return arr.slice().sort(() => {
+    return 0.5 - Math.random();
+  });
 };
+
+
+export const getRandomInteger = (a = 0, b = 1) => {
+  const lower = Math.ceil(Math.min(a, b));
+  const upper = Math.floor(Math.max(a, b));
+
+  return Math.floor(lower + Math.random() * (upper - lower + 1));
+};
+
+export const getRandomSubArray = (arr, length = arr.length) => {
+  // Проверка допустимости использования переданного числа вместо длины массива
+  length = Math.min(length, arr.length);
+
+  const half = Math.floor(length / 2);
+  const start = getRandomInteger(0, half);
+  const end = getRandomInteger(half, length);
+
+  return shuffleArray(arr).slice(start, end);
+};
+
+export const getRandomElement = (list) => {
+  const randomIndex = getRandomInteger(0, list.length - 1);
+
+  return list[randomIndex];
+};
+
+export const isEscEvent = (evt) => {
+  return evt.keyCode === ESC_KEYCODE;
+};
+
+
+
+export const generateId = () => Date.now() + parseInt(Math.random() * 10000, 10);
+
+export const generatePhotos = () => {
+  return new Array(getRandomInteger(0, PHOTOS_LIMIT))
+    .fill()
+    .map(() => {
+      return {
+        src: `http://picsum.photos/248/152?r=${Math.random()}`,
+        description: `Event photo`
+      };
+    });
+};
+

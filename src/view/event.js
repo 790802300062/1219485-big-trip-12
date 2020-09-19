@@ -1,66 +1,99 @@
-import {EventTypeWithPreposition} from '../const.js';
 import {
-  formatWholeDate,
+  determineEventPreposition,
+  getEventDuration
+} from '../utils/common.js';
+
+import {
   formatTime,
-  calculateTimeDifference
+  getTimeInterval
 } from '../utils/time-and-date.js';
 
-import Abstract from './abstract';
+import Abstract from '../view/abstract.js';
 
-const formatEventTitle = (event) => `${EventTypeWithPreposition[event.type]} ${event.destination.name}`;
-
-const createEventTemplate = (event) => {
-  return (`<li class="trip-events__item">
-      <div class="event">
-        <div class="event__type">
-          <img class="event__type-icon" width="42" height="42" src="img/icons/${event.type}.png" alt="Event type icon">
-        </div>
-        <h3 class="event__title">${formatEventTitle(event)}</h3>
-
-        <div class="event__schedule">
-          <p class="event__time">
-            <time class="event__start-time" datetime="${formatWholeDate(event.startTime)}">${formatTime(event.startTime)}</time>
-            &mdash;
-            <time class="event__end-time" datetime="${formatWholeDate(event.endTime)}">${formatTime(event.endTime)}</time>
-            </p>
-          <p class="event__duration">${calculateTimeDifference(event.startTime, event.endTime)}</p>
-        </div>
-
-        <p class="event__price">
-          &euro;&nbsp;<span class="event__price-value">${event.price}</span>
-        </p>
-
-        <button class="event__rollup-btn" type="button">
-          <span class="visually-hidden">Open event</span>
-        </button>
-      </div>
-    </li>`
-  );
-};
-
-export default class Event extends Abstract {
+export default class EventView extends Abstract {
   constructor(event) {
     super();
     this._event = event;
-    this._onRollupButtonClick = this._onRollupButtonClick.bind(this);
+    this._editClickHandler = this._editClickHandler.bind(this);
   }
 
-  _getTemplate() {
-    return createEventTemplate(this._event);
+  getTemplate() {
+    const {type, city, price} = this._event;
+
+    return (
+      `<li class="trip-events__item">
+        <div class="event">
+          <div class="event__type">
+            <img class="event__type-icon" width="42" height="42"
+              src="img/icons/${type.toLowerCase()}.png"
+              alt="Event type icon">
+          </div>
+          <h3 class="event__title">${determineEventPreposition(type)} ${city}</h3>
+
+          <div class="event__schedule">
+            ${this._createTimeTemplate()}
+          </div>
+
+          <p class="event__price">
+            &euro;&nbsp;<span class="event__price-value">${price}</span>
+          </p>
+
+          <h4 class="visually-hidden">Offers:</h4>
+          <ul class="event__selected-offers">
+            ${this._createEventOffersTemplate()}
+          </ul>
+
+          <button class="event__rollup-btn" type="button">
+            <span class="visually-hidden">Open event</span>
+          </button>
+        </div>
+      </li>`
+    );
   }
 
-  getContainer() {
-    return this.getElement().querySelector(`.event__price`);
+  _createTimeTemplate() {
+    const {timeStart, timeEnd} = this._event;
+
+    return (
+      `<p class="event__time">
+        <time class="event__start-time" datetime="${timeStart.toISOString()}">
+          ${formatTime(timeStart)}
+        </time>
+        &mdash;
+        <time class="event__end-time" datetime="${timeEnd.toISOString()}">
+          ${formatTime(timeEnd)}
+        </time>
+      </p>
+      <p class="event__duration">
+        ${getTimeInterval(getEventDuration(this._event))}
+      </p>`
+    );
   }
 
-  _onRollupButtonClick() {
-    this._callback.rollupButtonClick();
+  _createEventOffersTemplate() {
+    return this._event.offers
+      ? this._event.offers.map((offer) => {
+        return offer.checked
+          ? (
+            `<li class="event__offer">
+              <span class="event__offer-title">${offer.title}</span>
+              &plus;&euro;&nbsp;
+              <span class="event__offer-price">${offer.price}</span>
+            </li>`
+          )
+          : ``;
+      }).join(``)
+      : ``;
   }
 
-  setRollupButtonClickHandler(callback) {
-    this._callback.rollupButtonClick = callback;
-    this.getElement()
-      .querySelector(`.event__rollup-btn`)
-      .addEventListener(`click`, this._onRollupButtonClick);
+  setEditClickHandler(callback) {
+    this._callback.editClick = callback;
+    this.getElement().querySelector(`.event__rollup-btn`)
+      .addEventListener(`click`, this._editClickHandler);
+  }
+
+  _editClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.editClick();
   }
 }
