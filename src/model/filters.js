@@ -1,4 +1,8 @@
-import {FilterType} from '../const.js';
+import {
+  FilterType,
+  EventType
+} from '../const.js';
+
 import Observer from '../utils/observer.js';
 
 export default class FilterModel extends Observer {
@@ -7,9 +11,9 @@ export default class FilterModel extends Observer {
     this._currentFilter = FilterType.EVERYTHING;
   }
 
-  setFilter(updateType, filter) {
+  setFilter(filter) {
     this._currentFilter = filter;
-    this._notify(updateType, filter);
+    this._notify(EventType.FILTER, filter);
   }
 
   getFilter() {

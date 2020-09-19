@@ -1,69 +1,121 @@
-import {render, RenderPosition} from './utils/render.js';
-import {generateEvent} from './mock/event.js';
-import {generateDestinationCitiesDescription} from './mock/utils.js';
-import {DESTINATION_CITIES} from './mock/const.js';
-import {getTripRoute,
-  getTripDuration,
-  calculateTotalTripCost
-} from './utils/common.js';
+import {
+  render,
+  RenderPosition
+} from './utils/render.js';
 
-import TripInfo from './view/trip-info.js';
-import NewEventButton from './view/new-event-button.js';
-import TripRoute from './view/trip-route.js';
-import TripCost from './view/trip-cost.js';
-import Menu from './view/menu.js';
-import Filters from './view/filters.js';
+import {
+  FilterType,
+  MenuItem
+} from './const.js';
 
+import MenuView from './view/menu.js';
 import TripPresenter from './presenter/trip.js';
-import FilterPresenter from './presenter/filter.js';
-
-import TripModel from './model/trip.js';
+import FiltersPreseter from './presenter/filters.js';
+import TripInfoPresenter from './presenter/trip-info.js';
+import StatisticsPresenter from './presenter/statistics.js';
+import OffersModel from './model/offers.js';
 import EventsModel from './model/events.js';
-import FilterModel from './model/filter.js';
+import FiltersModel from './model/filters.js';
+import Api from './api.js';
 
-const EVENTS_AMOUNT = 3;
-let date = new Date();
+const AUTHORIZATION = `Basic io380cs93mlfrq1ii8sdfhurdy67k`;
+const END_POINT = `https://12.ecmascript.pages.academy/big-trip/`;
 
-const events = (new Array(EVENTS_AMOUNT)
-  .fill()
-  .map(() => {
-    let event = generateEvent(date);
-    date = event.endTime;
+const headerNode = document.querySelector(`.trip-main`);
+const menuHeaderNode = headerNode.querySelectorAll(`.trip-controls h2`)[0];
+const filtersHeaderNode = headerNode.querySelectorAll(`.trip-controls h2`)[1];
+const boardContainerNode = document.querySelector(`.trip-events`);
+const tripHeader = boardContainerNode.querySelector(`h2`);
+const newEventButton = headerNode.querySelector(`.trip-main__event-add-btn`);
 
-    return event;
-  })
+const newEventButtonClickHandler = (evt) => {
+  evt.preventDefault();
+  handleMenuClick(MenuItem.NEW_EVENT);
+  siteMenuComponent.setMenuItem(MenuItem.TABLE);
+};
+
+const newEventFormCloseHandler = () => {
+  newEventButton.disabled = false;
+};
+
+const handleMenuClick = (menuItem) => {
+  switch (menuItem) {
+    case MenuItem.NEW_EVENT:
+      statisticsPresenter.destroy();
+      tripPresenter.destroy();
+      filtersModel.setFilter(FilterType.EVERYTHING);
+      tripPresenter.init();
+      tripPresenter.createEvent(newEventFormCloseHandler);
+      newEventButton.disabled = true;
+      break;
+    case MenuItem.TABLE:
+      statisticsPresenter.destroy();
+      tripPresenter.init();
+      break;
+    case MenuItem.STATS:
+      tripPresenter.destroy();
+      statisticsPresenter.init();
+  }
+};
+
+const enableMenu = () => {
+  render(
+      menuHeaderNode,
+      siteMenuComponent,
+      RenderPosition.AFTEREND
+  );
+
+  siteMenuComponent.setMenuItemClickHandler(handleMenuClick);
+  newEventButton.addEventListener(`click`, newEventButtonClickHandler);
+  newEventButton.disabled = false;
+};
+
+const api = new Api(END_POINT, AUTHORIZATION);
+const offersModel = new OffersModel();
+const pointsModel = new EventsModel(offersModel);
+const filtersModel = new FiltersModel();
+const siteMenuComponent = new MenuView();
+const filtersPreseter = new FiltersPreseter(
+    filtersHeaderNode,
+    pointsModel,
+    filtersModel
+);
+const tripPresenter = new TripPresenter(
+    boardContainerNode,
+    tripHeader,
+    pointsModel,
+    offersModel,
+    filtersModel,
+    api
+);
+const informationPresenter = new TripInfoPresenter(
+    headerNode,
+    pointsModel,
+    filtersModel
+);
+const statisticsPresenter = new StatisticsPresenter(
+    boardContainerNode,
+    pointsModel
 );
 
-const eventsModel = new EventsModel();
-const tripModel = new TripModel();
-const filterModel = new FilterModel();
-tripModel.setDestinations(DESTINATION_CITIES);
-tripModel.setEvents(events);
+newEventButton.disabled = true;
 
-const tripInfoPosition = document.querySelector(`.trip-main`);
-const menuPosition = tripInfoPosition.querySelector(`.menu-position`);
-const filtersPosition = tripInfoPosition.querySelector(`.filters-position`);
-const eventsContainerPosition = document.querySelector(`.trip-events`);
-const destinations = generateDestinationCitiesDescription();
-const tripInfo = new TripInfo().getElement();
-
-render(tripInfoPosition, tripInfo, RenderPosition.AFTERBEGIN);
-
-const tripRoutePosition = tripInfoPosition.querySelector(`.trip-main__trip-info`);
-
-render(tripRoutePosition, new TripRoute(getTripRoute(events), getTripDuration(events)).getElement(), RenderPosition.AFTERBEGIN);
-render(tripRoutePosition, new TripCost(calculateTotalTripCost(events)).getElement(), RenderPosition.BEFOREEND);
-render(menuPosition, new Menu().getElement(), RenderPosition.AFTEREND);
-render(tripInfoPosition, new NewEventButton().getElement(), RenderPosition.BEFOREEND);
-render(filtersPosition, new Filters().getElement(), RenderPosition.AFTEREND);
-
-const tripPresenter = new TripPresenter(eventsContainerPosition, destinations, tripModel, filterModel);
-const filterPresenter = new FilterPresenter(filtersPosition, filterModel, eventsModel);
-
-filterPresenter.init();
+informationPresenter.init();
 tripPresenter.init();
+filtersPreseter.init();
 
-tripInfoPosition.querySelector(`.trip-main__event-add-btn`).addEventListener(`click`, (evt) => {
-  evt.preventDefault();
-  tripPresenter.createEvent();
-});
+Promise.all([
+  api.getOffers(),
+  api.getDestinations(),
+  api.getEvents(),
+])
+  .then(([offers, destinations, points]) => {
+    offersModel.setOffersFromServer(offers);
+    pointsModel.setDestinations(destinations);
+    pointsModel.setEvents(points);
+    enableMenu();
+  })
+  .catch(() => {
+    pointsModel.setEvents([]);
+    enableMenu();
+  });
