@@ -66,7 +66,7 @@ export default class EventEditView extends SmartView {
     this._deleteButtonClickHandler = this._deleteButtonClickHandler.bind(this);
 
     this._setInnerHandlers();
-    //this._setDatepickers();
+    this._setDatepickers();
     this._checkEditFormValidity();
   }
 
