@@ -66,7 +66,7 @@ export default class EventEditView extends SmartView {
     this._deleteButtonClickHandler = this._deleteButtonClickHandler.bind(this);
 
     this._setInnerHandlers();
-    this._setDatepickers();
+    //this._setDatepickers();
     this._checkEditFormValidity();
   }
 
@@ -148,11 +148,11 @@ export default class EventEditView extends SmartView {
           <h3 class="event__section-title event__section-title--offers">Offers</h3>
           <div class="event__available-offers">
           ${offers.map((offer) => {
-            return (
-              `<div class="event__offer-selector">
-                <input class="event__offer-checkbox visually-hidden"
-                id="event-offer-${offer.title}-1" type="checkbox" name="${offer.title}"
-                ${offer.checked ? `checked` : ``}>
+          return (
+            `<div class="event__offer-selector">
+              <input class="event__offer-checkbox visually-hidden"
+              id="event-offer-${offer.title}-1" type="checkbox" name="${offer.title}"
+              ${offer.checked ? `checked` : ``}>
 
               <label class="event__offer-label" for="event-offer-${offer.title}-1">
                 <span class="event__offer-title">${offer.title}</span>
@@ -226,8 +226,8 @@ export default class EventEditView extends SmartView {
           value="${city}" list="destination-list-1" >
         <datalist id="destination-list-1">
           ${Array.from(this._destinations.keys())
-            .map((it) => {
-              return `<option value="${it}"></option>`;
+            .map((option) => {
+              return `<option value="${option}"></option>`;
             })
             .join(``)}
         </datalist>
@@ -431,7 +431,7 @@ export default class EventEditView extends SmartView {
       this.updateDate(
           {
             city: newCity,
-            description: description,
+            destination: description,
             photos
           }
       );

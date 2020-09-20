@@ -1,7 +1,7 @@
 import {getTripDatesInterval} from '../utils/time-and-date.js';
 import Abstract from '../view/abstract.js';
 
-const MAX_CITY_AMOUNT = 3;
+const MAX_CITIES_AMOUNT = 3;
 
 export default class TripRouteView extends Abstract {
   constructor(events) {
@@ -29,7 +29,7 @@ export default class TripRouteView extends Abstract {
         tripRoute.push(event.city);
       }
 
-      if (tripRoute.length > MAX_CITY_AMOUNT) {
+      if (tripRoute.length > MAX_CITIES_AMOUNT) {
         return `${events[0].city} &mdash; ... &mdash; ${events[events.length - 1].city}`;
       }
     }

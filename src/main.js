@@ -4,6 +4,8 @@ import {
 } from './utils/render.js';
 
 import {
+  AUTHORIZATION,
+  END_POINT,
   FilterType,
   MenuItem
 } from './const.js';
@@ -18,87 +20,25 @@ import EventsModel from './model/events.js';
 import FiltersModel from './model/filters.js';
 import Api from './api.js';
 
-const AUTHORIZATION = `Basic io380cs93mlfrq1ii8sdfhurdy67k`;
-const END_POINT = `https://12.ecmascript.pages.academy/big-trip/`;
-
-const headerNode = document.querySelector(`.trip-main`);
-const menuHeaderNode = headerNode.querySelectorAll(`.trip-controls h2`)[0];
-const filtersHeaderNode = headerNode.querySelectorAll(`.trip-controls h2`)[1];
-const boardContainerNode = document.querySelector(`.trip-events`);
-const tripHeader = boardContainerNode.querySelector(`h2`);
-const newEventButton = headerNode.querySelector(`.trip-main__event-add-btn`);
-
-const newEventButtonClickHandler = (evt) => {
-  evt.preventDefault();
-  handleMenuClick(MenuItem.NEW_EVENT);
-  siteMenuComponent.setMenuItem(MenuItem.TABLE);
-};
-
-const newEventFormCloseHandler = () => {
-  newEventButton.disabled = false;
-};
-
-const handleMenuClick = (menuItem) => {
-  switch (menuItem) {
-    case MenuItem.NEW_EVENT:
-      statisticsPresenter.destroy();
-      tripPresenter.destroy();
-      filtersModel.setFilter(FilterType.EVERYTHING);
-      tripPresenter.init();
-      tripPresenter.createEvent(newEventFormCloseHandler);
-      newEventButton.disabled = true;
-      break;
-    case MenuItem.TABLE:
-      statisticsPresenter.destroy();
-      tripPresenter.init();
-      break;
-    case MenuItem.STATS:
-      tripPresenter.destroy();
-      statisticsPresenter.init();
-  }
-};
-
-const enableMenu = () => {
-  render(
-      menuHeaderNode,
-      siteMenuComponent,
-      RenderPosition.AFTEREND
-  );
-
-  siteMenuComponent.setMenuItemClickHandler(handleMenuClick);
-  newEventButton.addEventListener(`click`, newEventButtonClickHandler);
-  newEventButton.disabled = false;
-};
+const tripInfoPosition = document.querySelector(`.trip-main`);
+const menuPosition = tripInfoPosition.querySelector(`.menu-position`);
+const filtersPosition = tripInfoPosition.querySelector(`.filters-position`);
+const eventsContainerPosition = document.querySelector(`.trip-events`);
+const sortAndContentPosition = eventsContainerPosition.querySelector(`.sort-content-position`);
+const newEventButtonPosition = tripInfoPosition.querySelector(`.trip-main__event-add-btn`);
 
 const api = new Api(END_POINT, AUTHORIZATION);
 const offersModel = new OffersModel();
-const pointsModel = new EventsModel(offersModel);
+const eventsModel = new EventsModel(offersModel);
 const filtersModel = new FiltersModel();
-const siteMenuComponent = new MenuView();
-const filtersPreseter = new FiltersPreseter(
-    filtersHeaderNode,
-    pointsModel,
-    filtersModel
-);
-const tripPresenter = new TripPresenter(
-    boardContainerNode,
-    tripHeader,
-    pointsModel,
-    offersModel,
-    filtersModel,
-    api
-);
-const informationPresenter = new TripInfoPresenter(
-    headerNode,
-    pointsModel,
-    filtersModel
-);
-const statisticsPresenter = new StatisticsPresenter(
-    boardContainerNode,
-    pointsModel
-);
+const menuComponent = new MenuView();
+const filtersPreseter = new FiltersPreseter(filtersPosition, eventsModel, filtersModel);
+const tripPresenter = new TripPresenter(eventsContainerPosition, sortAndContentPosition,
+    eventsModel, offersModel, filtersModel, api);
+const informationPresenter = new TripInfoPresenter(tripInfoPosition, eventsModel, filtersModel);
+const statisticsPresenter = new StatisticsPresenter(eventsContainerPosition, eventsModel);
 
-newEventButton.disabled = true;
+newEventButtonPosition.disabled = true;
 
 informationPresenter.init();
 tripPresenter.init();
@@ -109,13 +49,51 @@ Promise.all([
   api.getDestinations(),
   api.getEvents(),
 ])
-  .then(([offers, destinations, points]) => {
+  .then(([offers, destinations, events]) => {
     offersModel.setOffersFromServer(offers);
-    pointsModel.setDestinations(destinations);
-    pointsModel.setEvents(points);
+    eventsModel.setDestinations(destinations);
+    eventsModel.setEvents(events);
     enableMenu();
   })
   .catch(() => {
-    pointsModel.setEvents([]);
+    eventsModel.setEvents([]);
     enableMenu();
   });
+
+const enableMenu = () => {
+  render(menuPosition, menuComponent, RenderPosition.AFTEREND);
+
+  menuComponent.setMenuItemClickHandler(handleMenuClick);
+  newEventButtonPosition.addEventListener(`click`, newEventButtonClickHandler);
+  newEventButtonPosition.disabled = false;
+};
+
+const newEventButtonClickHandler = (evt) => {
+  evt.preventDefault();
+  handleMenuClick(MenuItem.NEW_EVENT);
+  menuComponent.setMenuItem(MenuItem.TABLE);
+};
+
+const newEventFormCloseHandler = () => {
+  newEventButtonPosition.disabled = false;
+};
+
+const handleMenuClick = (menuItem) => {
+  switch (menuItem) {
+    case MenuItem.NEW_EVENT:
+      statisticsPresenter.destroy();
+      tripPresenter.destroy();
+      filtersModel.setFilter(FilterType.EVERYTHING);
+      tripPresenter.init();
+      tripPresenter.createEvent(newEventFormCloseHandler);
+      newEventButtonPosition.disabled = true;
+      break;
+    case MenuItem.TABLE:
+      statisticsPresenter.destroy();
+      tripPresenter.init();
+      break;
+    case MenuItem.STATS:
+      tripPresenter.destroy();
+      statisticsPresenter.init();
+  }
+};

@@ -6,7 +6,7 @@ import {
 import Abstract from '../view/abstract.js';
 
 const createDayTemplate = (dayIndex, date) => {
-  return(
+  return (
     `<span class="day__counter">${dayIndex}</span>
       <time class="day__date" datetime="${formatWholeDate(date)}">
         ${formatMonth(new Date(date))}
@@ -15,12 +15,12 @@ const createDayTemplate = (dayIndex, date) => {
 };
 
 const createDayContent = (dayIndex, dayContent) => {
-  return(
+  return (
     `<li class="trip-days__item  day" id="trip-days__item-${dayIndex}">
         <div class="day__info">${dayContent}</div>
     </li>`
-  )
-}
+  );
+};
 
 export default class DayView extends Abstract {
   constructor(date, dayIndex, visible) {

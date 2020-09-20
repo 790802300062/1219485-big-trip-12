@@ -3,7 +3,6 @@ import {isInputTag} from '../utils/common.js';
 
 import Abstract from '../view/abstract.js';
 
-
 export default class FilterView extends Abstract {
   constructor(currentFilterType, filters) {
     super();

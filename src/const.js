@@ -68,3 +68,6 @@ export const ChartType = {
   TRANSPORT: `TRANSPORT`,
   TIME_SPENT: `TIME SPENT`,
 };
+
+export const AUTHORIZATION = `Basic 123abc456def`;
+export const END_POINT = `https://12.ecmascript.pages.academy/big-trip/`;

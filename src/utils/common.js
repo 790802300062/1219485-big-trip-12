@@ -1,6 +1,6 @@
 import {EVENT_TYPES} from '../const.js';
 
-const ESC_KEYCODE = 27;
+const ESC_KEY = `Escape`;
 const PHOTOS_LIMIT = 5;
 
 const TagName = {
@@ -56,10 +56,8 @@ export const getRandomElement = (list) => {
 };
 
 export const isEscEvent = (evt) => {
-  return evt.keyCode === ESC_KEYCODE;
+  return evt.key === ESC_KEY;
 };
-
-
 
 export const generateId = () => Date.now() + parseInt(Math.random() * 10000, 10);
 

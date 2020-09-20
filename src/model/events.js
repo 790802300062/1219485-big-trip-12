@@ -68,10 +68,8 @@ export default class EventsModel extends Observer {
       id: event.id,
       type: makeFirstLetterUppercased(event.type),
       city: event.destination.name,
-      offers: this._offersModel.adaptOffersToClient(
-          makeFirstLetterUppercased(event.type),
-          event.offers
-      ),
+      offers: this._offersModel.adaptOffersToClient(makeFirstLetterUppercased(event.type),
+          event.offers),
       timeStart: new Date(event.date_from),
       timeEnd: new Date(event.date_to),
       price: event.base_price,

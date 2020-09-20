@@ -10,6 +10,8 @@ import {
 
 import Abstract from '../view/abstract.js';
 
+const MAX_OFFERS_AMOUNT = 3;
+
 export default class EventView extends Abstract {
   constructor(event) {
     super();
@@ -24,9 +26,7 @@ export default class EventView extends Abstract {
       `<li class="trip-events__item">
         <div class="event">
           <div class="event__type">
-            <img class="event__type-icon" width="42" height="42"
-              src="img/icons/${type.toLowerCase()}.png"
-              alt="Event type icon">
+            <img class="event__type-icon" width="42" height="42" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
           </div>
           <h3 class="event__title">${determineEventPreposition(type)} ${city}</h3>
 
@@ -71,20 +71,30 @@ export default class EventView extends Abstract {
   }
 
   _createEventOffersTemplate() {
-    return this._event.offers
-      ? this._event.offers.map((offer) => {
-        return offer.checked
-          ? (
-            `<li class="event__offer">
-              <span class="event__offer-title">${offer.title}</span>
-              &plus;&euro;&nbsp;
-              <span class="event__offer-price">${offer.price}</span>
-            </li>`
-          )
-          : ``;
-      }).join(``)
-      : ``;
+    let eventOffers = [];
+    eventOffers = this._event.offers.map((offer) => {
+      return offer.checked
+        ? (
+          `<li class="event__offer">
+            <span class="event__offer-title">${offer.title}</span>
+            &plus;&euro;&nbsp;
+            <span class="event__offer-price">${offer.price}</span>
+          </li>`
+        )
+        : ``;
+    });
+
+    let filteredOffers = eventOffers.filter((element) => {
+      return (element !== null) && (element !== ``);
+    });
+
+    if (filteredOffers.length > MAX_OFFERS_AMOUNT) {
+      return filteredOffers.slice(0, MAX_OFFERS_AMOUNT).join(``);
+    }
+
+    return filteredOffers.join(``);
   }
+
 
   setEditClickHandler(callback) {
     this._callback.editClick = callback;

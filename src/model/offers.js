@@ -56,13 +56,12 @@ export default class OffersModel extends Observer {
 
   adaptOffersToServer(offers) {
     return offers
-    .filter((offer) => offer.checked)
-    .map((offer) => {
-      const offetCopy = Object.assign({}, offer);
+      .filter((offer) => offer.checked)
+      .map((offer) => {
+        const offerCopy = Object.assign({}, offer);
+        delete offerCopy.checked;
 
-      delete offetCopy.checked;
-
-      return offetCopy;
-    });
+        return offerCopy;
+      });
   }
 }

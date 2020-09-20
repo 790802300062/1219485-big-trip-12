@@ -69,18 +69,3 @@ export const generateTimeInterval = () => {
     end,
   };
 };
-
-
-export const getHumanizeTime = (time) => {
-  return moment(time).format(`HH:mm`);
-};
-
-
-
-export const getFormattedTimeString = (time) => {
-  if (!(time instanceof Date)) {
-    return ``;
-  }
-
-  return moment(time).format(`DD/MM/YY HH:mm`);
-};

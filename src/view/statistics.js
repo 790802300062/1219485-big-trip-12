@@ -11,18 +11,21 @@ import Abstract from '../view/abstract.js';
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-const ChartProperty = {
+const ChartProperties = {
   TYPE: `horizontalBar`,
   BAR_HEIGHT: 400,
   BAR_THICKNESS: 44,
   MIN_BAR_LENGTH: 100,
-  OPTIONS_FONT_SIZE: 13,
-  OPTIONS_TITLE_FONT_SIZE: 23,
-  OPTIONS_SCALES_Y_AXES_PADDING: 5,
-  OPTIONS_SCALES_Y_AXES_FONT_SIZE: 13,
 };
 
-const ChartValue = {
+const ChartOptionsValues = {
+  FONT_SIZE: 13,
+  TITLE_FONT_SIZE: 23,
+  AXE_Y_PADDING: 5,
+  AXE_Y_FONT_SIZE: 13
+};
+
+const ChartValues = {
   WHITE: `#ffffff`,
   BLACK: `#000000`,
   START: `start`,
@@ -88,9 +91,9 @@ export default class StatisticsView extends Abstract {
     const transportChartPosition = this.getElement().querySelector(`.statistics__chart--transport`);
     const timeSpendChartPosition = this.getElement().querySelector(`.statistics__chart--time`);
 
-    moneyChartPosition.height = ChartProperty.BAR_HEIGHT;
-    transportChartPosition.height = ChartProperty.BAR_HEIGHT;
-    timeSpendChartPosition.height = ChartProperty.BAR_HEIGHT;
+    moneyChartPosition.height = ChartProperties.BAR_HEIGHT;
+    transportChartPosition.height = ChartProperties.BAR_HEIGHT;
+    timeSpendChartPosition.height = ChartProperties.BAR_HEIGHT;
 
     this._moneyChart = this._renderChart(moneyChartPosition, ChartType.MONEY, ((value) => `€ ${value}`));
     this._transportChart = this._renderChart(transportChartPosition, ChartType.TRANSPORT, (value) => `${value}x`);
@@ -100,43 +103,43 @@ export default class StatisticsView extends Abstract {
   _renderChart(ctx, text, formatter) {
     return new Chart(ctx, {
       plugins: [ChartDataLabels],
-      type: ChartProperty.TYPE,
+      type: ChartProperties.TYPE,
       data: {
         labels: this._data[text].labels,
         datasets: [{
           data: this._data[text].data,
-          backgroundColor: ChartValue.WHITE,
-          hoverBackgroundColor: ChartValue.WHITE,
-          anchor: ChartValue.START,
-          barThickness: ChartProperty.BAR_THICKNESS,
-          minBarLength: ChartProperty.MIN_BAR_LENGTH
+          backgroundColor: ChartValues.WHITE,
+          hoverBackgroundColor: ChartValues.WHITE,
+          anchor: ChartValues.START,
+          barThickness: ChartProperties.BAR_THICKNESS,
+          minBarLength: ChartProperties.MIN_BAR_LENGTH
         }]
       },
       options: {
         plugins: {
           datalabels: {
             font: {
-              size: ChartProperty.OPTIONS_FONT_SIZE
+              size: ChartOptionsValues.FONT_SIZE
             },
-            color: ChartValue.BLACK,
-            anchor: ChartValue.END,
-            align: ChartValue.START,
+            color: ChartValues.BLACK,
+            anchor: ChartValues.END,
+            align: ChartValues.START,
             formatter
           }
         },
         title: {
           display: true,
           text,
-          fontColor: ChartValue.BLACK,
-          fontSize: ChartProperty.OPTIONS_TITLE_FONT_SIZE,
-          position: ChartValue.LEFT
+          fontColor: ChartValues.BLACK,
+          fontSize: ChartOptionsValues.TITLE_FONT_SIZE,
+          position: ChartValues.LEFT
         },
         scales: {
           yAxes: [{
             ticks: {
-              fontColor: ChartValue.BLACK,
-              padding: ChartProperty.OPTIONS_SCALES_Y_AXES_PADDING,
-              fontSize: ChartProperty.OPTIONS_SCALES_Y_AXES_FONT_SIZE,
+              fontColor: ChartValues.BLACK,
+              padding: ChartOptionsValues.AXE_Y_PADDING,
+              fontSize: ChartOptionsValues.AXE_Y_FONT_SIZE,
             },
             gridLines: {
               display: false,
