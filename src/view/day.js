@@ -3,27 +3,37 @@ import {
   formatMonth
 } from '../utils/time-and-date.js';
 
-import Abstract from './abstract';
+import Abstract from '../view/abstract.js';
 
-const createDayTemplate = (dayDate, counter) => {
-  return (`<li class="trip-days__item  day">
-      <div class="day__info">
-        ${counter !== 0 ? `<span class="day__counter">${counter}</span>
-        <time class="day__date" datetime="${formatWholeDate(dayDate)}">${formatMonth(dayDate)}</time>` : ``}
-      </div>
+const createDayTemplate = (dayIndex, date) => {
+  return (
+    `<span class="day__counter">${dayIndex}</span>
+      <time class="day__date" datetime="${formatWholeDate(date)}">
+        ${formatMonth(new Date(date))}
+      </time>`
+  );
+};
+
+const createDayContent = (dayIndex, dayContent) => {
+  return (
+    `<li class="trip-days__item  day" id="trip-days__item-${dayIndex}">
+        <div class="day__info">${dayContent}</div>
     </li>`
   );
 };
 
 export default class DayView extends Abstract {
-  constructor(dayDate, counter) {
+  constructor(date, dayIndex, visible) {
     super();
-
-    this._dayDate = dayDate;
-    this._counter = counter;
+    this._date = date;
+    this._dayIndex = dayIndex;
+    this._visible = visible;
   }
 
-  _getTemplate() {
-    return createDayTemplate(this._dayDate, this._counter);
+  getTemplate() {
+    const dayContent = this._visible ? createDayTemplate(this._dayIndex, this._date) : ``;
+
+    return createDayContent(this._dayIndex, dayContent);
   }
 }
+
