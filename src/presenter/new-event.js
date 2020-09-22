@@ -1,8 +1,5 @@
 import {UserAction} from '../const.js';
-import {
-  isEscEvent,
-  generateId
-} from '../utils/common.js';
+import {isEscEvent} from '../utils/common.js';
 
 import {
   render,
@@ -68,10 +65,10 @@ export default class NewEventPresenter {
     }
   }
 
-  _formSubmitHandler(newEventData) {
+  _formSubmitHandler(newEvent) {
     this._changeEventData(
         UserAction.ADD_EVENT,
-        Object.assign({id: generateId()}, newEventData)
+        newEvent
     );
     this.destroy();
   }

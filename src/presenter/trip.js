@@ -258,10 +258,16 @@ export default class TripPresenter extends EventsPresenter {
           });
         break;
       case UserAction.DELETE_EVENT:
-        this._eventsModel.deleteEvent(event);
+        this._api.deleteEvent(this._eventsModel.adaptToServer(event))
+          .then(() => {
+            this._eventsModel.deleteEvent(event);
+          });
         break;
       case UserAction.ADD_EVENT:
-        this._eventsModel.addEvent(event);
+        this._api.addEvent(this._eventsModel.adaptToServer(event))
+          .then((response) => {
+            this._eventsModel.addEvent(this._eventsModel._adaptToClient(response));
+          });
         break;
     }
   }

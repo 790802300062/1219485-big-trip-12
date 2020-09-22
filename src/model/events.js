@@ -86,7 +86,7 @@ export default class EventsModel extends Observer {
       'base_price': event.price,
       'date_from': event.timeStart.toISOString(),
       'date_to': event.timeEnd.toISOString(),
-      'is_favorite': event.isFavorite,
+      'is_favorite': Boolean(event.isFavorite),
       'destination': {
         'description': event.destination,
         'name': event.city,
