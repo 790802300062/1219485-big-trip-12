@@ -26,7 +26,7 @@ export const getTripDatesInterval = (events) => {
   }
 
   const start = events[0].timeStart;
-  const end = events[events.length - 1].timeStart;
+  const end = events[events.length - 1].timeEnd;
 
   const endString = start.getMonth() === end.getMonth()
     ? moment(end).format(`DD`)

@@ -113,11 +113,7 @@ const handleMenuClick = (menuItem) => {
 };
 
 window.addEventListener(`load`, () => {
-  navigator.serviceWorker.register(`/sw.js`)
-    .then(() => {})
-    .catch(() => {
-      throw new Error(SW_ERROR_MESSAGE);
-    });
+  navigator.serviceWorker.register(`/sw.js`);
 });
 
 window.addEventListener(`online`, () => {

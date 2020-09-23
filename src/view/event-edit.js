@@ -12,6 +12,7 @@ import SmartView from '../view/smart.js';
 import flatpickr from 'flatpickr';
 import moment from 'moment';
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
+import he from 'he';
 
 const HTML_CLASS = {
   CITY: `event__field-group--destination`,
@@ -39,8 +40,8 @@ const FLATPICKR_PROPERTIES = {
 export default class EventEditView extends SmartView {
   constructor(destinations, offersByType, event) {
     super();
-    this._destinations = destinations;
-    this._offersByType = offersByType;
+    this._destinations = destinations.size ? destinations : new Map();
+    this._offersByType = offersByType.size ? offersByType : new Map();
 
     if (!event) {
       event = BLANK_EVENT;
@@ -136,15 +137,15 @@ export default class EventEditView extends SmartView {
       : ``;
   }
 
-  _createInnerPartOfOffersSectionTemplate() {
-    const {type, offers, isDisabled} = this._data;
+  _createInnerPartOfOffersSectionTemplate(offersList) {
+    const {offers, isDisabled} = this._data;
 
-    const offersList = this._offersByType.get(type);
     const checkedOffers = offers.reduce((result, offer) => {
       return result.set(offer.title, offer);
     }, new Map());
 
-    return offersList.map((offer) => {
+    return offersList
+      .map((offer) => {
       return (
         `<div class="event__offer-selector">
           <input class="event__offer-checkbox visually-hidden" id="event-offer-${offer.title}-1" type="checkbox"
@@ -161,16 +162,19 @@ export default class EventEditView extends SmartView {
   }
 
   _createTripOffersSectionTemplate() {
-    return (
-      `<section class="event__section event__section--offers">
-        <h3 class="event__section-title event__section-title--offers">Offers</h3>
-        <div class="event__available-offers">
-          ${this._createInnerPartOfOffersSectionTemplate()}
-        </div>
-      </section>`
-    );
-  }
+    const {type} = this._data;
 
+    const offersList = this._offersByType.get(type);
+
+    return (offersList && offersList.length)
+      ? `<section class="event__section event__section--offers">
+          <h3 class="event__section-title event__section-title--offers">Offers</h3>
+          <div class="event__available-offers">
+            ${this._createInnerPartOfOffersSectionTemplate(offersList)}
+          </div>
+        </section>`
+      : ``;
+  }
 
   _createTripDestinationDescriptionTemplate() {
     const {destination, photos} = this._data;
@@ -230,7 +234,7 @@ export default class EventEditView extends SmartView {
         </label>
         <input class="event__input event__input--destination" id="event-destination-1"
           type="text" name="event-destination"
-          value="${city}" list="destination-list-1" ${isDisabled ? `disabled` : ``}>
+          value="${he.encode(city)}" list="destination-list-1" ${isDisabled ? `disabled` : ``}>
         <datalist id="destination-list-1">
           ${Array.from(this._destinations.keys())
             .map((option) => {
@@ -386,7 +390,7 @@ export default class EventEditView extends SmartView {
     let errorMessage = ``;
     let validity = true;
 
-    if (!(parseInt(priceNode.value, 10) > 0)) {
+    if (!(parseInt(priceNode.value, 10))) {
       errorMessage = `Стоимость должна быть больше 0`;
       validity = false;
     }
@@ -429,7 +433,7 @@ export default class EventEditView extends SmartView {
     const type = makeFirstLetterUppercased(evt.target.value);
     this.getElement().querySelector(`.event__type-toggle`).checked = false;
 
-    this.updateData({type});
+    this.updateData({type, offers: []});
   }
 
   _eventCityChangeHandler(evt) {
@@ -527,11 +531,11 @@ export default class EventEditView extends SmartView {
     });
   }
 
-  static transformDataToEvent(data) {
-    delete data.isDisabled;
-    delete data.isSaving;
-    delete data.isDeleting;
+  static transformDataToEvent(eventData) {
+    delete eventData.isDisabled;
+    delete eventData.isSaving;
+    delete eventData.isDeleting;
 
-    return data;
+    return eventData;
   }
 }

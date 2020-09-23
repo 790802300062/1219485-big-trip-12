@@ -70,11 +70,11 @@ export default class Api {
     .then(Api.toJSON);
   }
 
-  sync(data) {
+  sync(serverEvents) {
     return this._load({
       url: Url.EVENTS + `/sync`,
       method: Method.POST,
-      body: JSON.stringify(data),
+      body: JSON.stringify(serverEvents),
       headers: new Headers({"Content-Type": `application/json`})
     })
       .then(Api.toJSON);
