@@ -257,7 +257,7 @@ export default class TripPresenter extends EventsPresenter {
         this._api.updateEvent(event)
           .then((response) => {
             this._eventsModel.updateEvent(response);
-        })
+          })
           .catch(() => {
             this._existEventPresenters[event.id].setFormViewStatus(FormStatus.ABORTING);
           });

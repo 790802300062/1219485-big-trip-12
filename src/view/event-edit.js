@@ -1,4 +1,4 @@
-import {EVENT_TYPES, UserAction, EventCategory} from '../const.js';
+import {EVENT_TYPES, EventCategory} from '../const.js';
 import {formatDateAndTime} from '../utils/time-and-date.js';
 import {
   determineEventPreposition,
@@ -145,7 +145,7 @@ export default class EventEditView extends SmartView {
 
     return offersList.map((offer) => {
       return (
-       `<div class="event__offer-selector">
+        `<div class="event__offer-selector">
           <input class="event__offer-checkbox visually-hidden" id="event-offer-${offer.title}-1" type="checkbox"
             name="${offer.title}" ${checkedOffers.has(offer.title) ? `checked` : ``} ${isDisabled ? `disabled` : ``}>
           <label class="event__offer-label" for="event-offer-${offer.title}-1">
@@ -342,8 +342,8 @@ export default class EventEditView extends SmartView {
     this.getElement().querySelector(`.${HTML_CLASS.PRICE}`)
       .addEventListener(`change`, this._eventPriceChangeHandler);
 
-      if (this._offersByType && this._offersByType.get(this._data.type)
-        && this._offersByType.get(this._data.type).length) {
+    if (this._offersByType && this._offersByType.get(this._data.type)
+      && this._offersByType.get(this._data.type).length) {
       this.getElement().querySelector(`.event__available-offers`)
         .addEventListener(`click`, this._offersChangeHandler);
     }
