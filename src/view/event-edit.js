@@ -304,23 +304,25 @@ export default class EventEditView extends SmartView {
     this.updateData(EventEditView.transformEventToData(event));
   }
 
-  destroyPicker(datepicker) {
-    if (datepicker) {
-      datepicker.destroy();
-      datepicker = null;
+  removeElement() {
+    super.removeElement();
+    this._destroyDateDatepickers();
+  }
+
+
+  _destroyDateDatepickers() {
+    if (this._startDatepicker) {
+      this._startDatepicker.destroy();
+      this._startDatepicker = null;
+    }
+    if (this._endDatepicker) {
+      this._endDatepicker.destroy();
+      this._endDatepicker = null;
     }
   }
 
   _setDatepickers() {
-    if (this._startDatepicker) {
-      this.destroyPicker(this._startDatepicker);
-      this._startDatepicker = null;
-    }
-
-    if (this._endDatepicker) {
-      this.destroyPicker(this._endDatepicker);
-      this._endDatepicker = null;
-    }
+    this._destroyDateDatepickers();
 
     this._startDatepicker = flatpickr(
         this.getElement().querySelector(`#event-start-time-1`),
@@ -332,6 +334,7 @@ export default class EventEditView extends SmartView {
             FLATPICKR_PROPERTIES
         )
     );
+
 
     this._endDatepicker = flatpickr(
         this.getElement().querySelector(`#event-end-time-1`),
