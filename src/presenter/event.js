@@ -1,5 +1,9 @@
 import {isEscEvent} from '../utils/common.js';
-import {UserAction} from '../const.js';
+import {
+  UserAction,
+  FormStatus
+} from '../const.js';
+
 import {
   replace,
   append,
@@ -86,6 +90,35 @@ export default class EventPresenter {
     }
   }
 
+  setFormViewStatus(status) {
+    const resetFormStatus = () => {
+      this._eventEditComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    switch (status) {
+      case FormStatus.SAVING:
+        this._eventEditComponent.updateData({
+          isDisabled: true,
+          isSaving: true
+        });
+        break;
+      case FormStatus.DELETING:
+        this._eventEditComponent.updateData({
+          isDisabled: true,
+          isDeleting: true
+        });
+        break;
+      case FormStatus.ABORTING:
+        this._eventComponent.shake(resetFormStatus);
+        this._eventEditComponent.shake(resetFormStatus);
+        break;
+    }
+  }
+
   _replaceEventToForm() {
     replace(this._eventEditComponent, this._eventComponent);
     this._mode = Mode.EDITING;
@@ -112,14 +145,13 @@ export default class EventPresenter {
 
   _formSubmitHandler(newEventData) {
     this._changeEventData(UserAction.UPDATE_EVENT, newEventData);
-    this._replaceFormToEvent();
   }
 
   _formCloseHandler() {
     this.resetView();
   }
 
-  _deleteClickHandler(userAction, event) {
-    this._changeEventData(userAction, event);
+  _deleteClickHandler(event) {
+    this._changeEventData(UserAction.DELETE_EVENT, event);
   }
 }

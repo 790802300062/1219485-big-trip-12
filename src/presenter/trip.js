@@ -9,7 +9,8 @@ import {
 import {
   SortType,
   UserAction,
-  EventType
+  EventType,
+  FormStatus
 } from '../const.js';
 
 import SortView from '../view/sort.js';
@@ -252,21 +253,33 @@ export default class TripPresenter extends EventsPresenter {
   _changeEventsData(userAction, event) {
     switch (userAction) {
       case UserAction.UPDATE_EVENT:
+        this._existEventPresenters[event.id].setFormViewStatus(FormStatus.SAVING);
         this._api.updateEvent(this._eventsModel.adaptToServer(event))
-          .then(() => {
-            this._eventsModel.updateEvent(event);
+          .then((response) => {
+            this._eventsModel.updateEvent(this._eventsModel._adaptToClient(response));
+        })
+          .catch(() => {
+            this._existEventPresenters[event.id].setFormViewStatus(FormStatus.ABORTING);
           });
         break;
       case UserAction.DELETE_EVENT:
+        this._existEventPresenters[event.id].setFormViewStatus(FormStatus.DELETING);
         this._api.deleteEvent(this._eventsModel.adaptToServer(event))
           .then(() => {
             this._eventsModel.deleteEvent(event);
+          })
+          .catch(() => {
+            this._existEventPresenters[event.id].setFormViewStatus(FormStatus.ABORTING);
           });
         break;
       case UserAction.ADD_EVENT:
+        this._newEventPresenter.setFormViewStatus(FormStatus.SAVING);
         this._api.addEvent(this._eventsModel.adaptToServer(event))
           .then((response) => {
             this._eventsModel.addEvent(this._eventsModel._adaptToClient(response));
+          })
+          .catch(() => {
+            this._newEventPresenter.setFormViewStatus(FormStatus.ABORTING);
           });
         break;
     }

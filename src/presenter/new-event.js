@@ -1,5 +1,8 @@
-import {UserAction} from '../const.js';
 import {isEscEvent} from '../utils/common.js';
+import {
+  UserAction,
+  FormStatus
+} from '../const.js';
 
 import {
   render,
@@ -43,6 +46,28 @@ export default class NewEventPresenter {
     document.addEventListener(`keydown`, this._escKeyDownHandler);
   }
 
+  setFormViewStatus(status) {
+    const resetFormStatus = () => {
+      this._eventEditComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    switch (status) {
+      case FormStatus.SAVING:
+        this._eventEditComponent.updateData({
+          isDisabled: true,
+          isSaving: true
+        });
+        break;
+      case FormStatus.ABORTING:
+        this._eventEditComponent.shake(resetFormStatus);
+        break;
+    }
+  }
+
   destroy() {
     if (this._eventEditComponent === null) {
       return;
@@ -70,7 +95,6 @@ export default class NewEventPresenter {
         UserAction.ADD_EVENT,
         newEvent
     );
-    this.destroy();
   }
 
   _deleteClickHandler() {

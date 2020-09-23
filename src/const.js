@@ -50,6 +50,12 @@ export const MenuItem = {
   NEW_EVENT: `New Event`
 };
 
+export const FormStatus = {
+  SAVING: `SAVING`,
+  DELETING: `DELETING`,
+  ABORTING: `ABORTING`
+};
+
 export const VehicleEmoji = new Map([
   [`Taxi`, `🚕`],
   [`Bus`, `🚌`],

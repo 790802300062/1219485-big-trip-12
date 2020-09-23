@@ -71,7 +71,8 @@ export default class EventEditView extends SmartView {
   }
 
   getTemplate() {
-    const {type, timeStart, timeEnd, price} = this._data;
+    const {type, timeStart, timeEnd, price, isDisabled, isSaving, isDeleting} = this._data;
+    const deleteButtonView = isDeleting ? `Deleting...` : `Delete`;
 
     return (
       `<form class="trip-events__item event event--edit" action="#" method="post">
@@ -82,7 +83,7 @@ export default class EventEditView extends SmartView {
             <img class="event__type-icon" width="17" height="17"
               src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
           </label>
-          <input class="event__type-toggle visually-hidden" id="event-type-toggle-1" type="checkbox" >
+          <input class="event__type-toggle visually-hidden" id="event-type-toggle-1" type="checkbox" ${isDisabled ? `disabled` : ``}>
           <div class="event__type-list">${this._createTypesListTemplate()}</div>
         </div>
 
@@ -91,10 +92,10 @@ export default class EventEditView extends SmartView {
         <div class="event__field-group event__field-group--time">
           <label class="visually-hidden" for="event-start-time-1">From</label>
           <input class="event__input event__input--time" id="event-start-time-1" type="text" name="event-start-time"
-            value="${formatDateAndTime(timeStart)}" readonly> &mdash;
+            value="${formatDateAndTime(timeStart)}" ${isDisabled ? `disabled` : ``} readonly> &mdash;
           <label class="visually-hidden" for="event-end-time-1">To</label>
             <input class="event__input event__input--time" id="event-end-time-1" type="text" name="event-end-time"
-            value="${formatDateAndTime(timeEnd)}" readonly>
+            value="${formatDateAndTime(timeEnd)}" ${isDisabled ? `disabled` : ``} readonly>
         </div>
 
         <div class="event__field-group event__field-group--price">
@@ -102,13 +103,11 @@ export default class EventEditView extends SmartView {
             <span class="visually-hidden">Price</span> &euro;
           </label>
           <input class="event__input ${HTML_CLASS.PRICE}" id="event-price-1" type="number" name="event-price"
-            value="${price}">
+            value="${price}" ${isDisabled ? `disabled` : ``}>
         </div>
 
-        <button class="event__save-btn btn btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">
-          ${this._isEventNew ? `Cancel` : `Delete`}
-        </button>
+        <button class="event__save-btn btn btn--blue" type="submit" ${isDisabled ? `disabled` : ``}> ${isSaving ? `Saving...` : `Save`} </button>
+        <button class="event__reset-btn" type="reset" ${isDisabled ? `disabled` : ``}> ${this._isEventNew ? `Cancel` : deleteButtonView} </button>
 
         ${this._createTripFavoriteButtonTemplate()}
       </header>
@@ -120,12 +119,12 @@ export default class EventEditView extends SmartView {
   }
 
   _createTripFavoriteButtonTemplate() {
-    const {isFavorite} = this._data;
+    const {isFavorite, isDisabled} = this._data;
 
     return !this._isEventNew
       ? (
         `<input id="event-favorite-1" class="event__favorite-checkbox visually-hidden"
-          type="checkbox" name="event-favorite" ${isFavorite ? `checked` : ``}>
+          type="checkbox" name="event-favorite" ${isFavorite ? `checked` : ``} ${isDisabled ? `disabled` : ``}>
         <label class="event__favorite-btn" for="event-favorite-1">
           <span class="visually-hidden">Add to favorite</span>
           <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
@@ -133,14 +132,14 @@ export default class EventEditView extends SmartView {
           </svg>
         </label>
 
-        <button class="event__rollup-btn" type="button">
+        <button class="event__rollup-btn" type="button" ${isDisabled ? `disabled` : ``}>
           <span class="visually-hidden">Open event</span>
         </button>`)
       : ``;
   }
 
   _createTripOffersTemplate() {
-    const {offers} = this._data;
+    const {offers, isDisabled} = this._data;
 
     return offers.length
       ? (
@@ -152,7 +151,7 @@ export default class EventEditView extends SmartView {
             `<div class="event__offer-selector">
               <input class="event__offer-checkbox visually-hidden"
               id="event-offer-${offer.title}-1" type="checkbox" name="${offer.title}"
-              ${offer.checked ? `checked` : ``}>
+              ${offer.checked ? `checked` : ``} ${isDisabled ? `disabled` : ``}>
 
               <label class="event__offer-label" for="event-offer-${offer.title}-1">
                 <span class="event__offer-title">${offer.title}</span>
@@ -214,7 +213,7 @@ export default class EventEditView extends SmartView {
   }
 
   _createTripCityTemplate() {
-    const {type, city} = this._data;
+    const {type, city, isDisabled} = this._data;
 
     return (
       `<div class="event__field-group ${HTML_CLASS.CITY}">
@@ -223,7 +222,7 @@ export default class EventEditView extends SmartView {
         </label>
         <input class="event__input event__input--destination" id="event-destination-1"
           type="text" name="event-destination"
-          value="${city}" list="destination-list-1" >
+          value="${city}" list="destination-list-1" ${isDisabled ? `disabled` : ``}>
         <datalist id="destination-list-1">
           ${Array.from(this._destinations.keys())
             .map((option) => {
@@ -290,7 +289,7 @@ export default class EventEditView extends SmartView {
   }
 
   reset(event) {
-    this.updateDate(event);
+    this.updateData(EventEditView.transformEventToData(event));
   }
 
   _setDatepickers() {
@@ -388,7 +387,7 @@ export default class EventEditView extends SmartView {
   _formSubmitHandler(evt) {
     evt.preventDefault();
     if (this._checkEditFormValidity()) {
-      this._callback.formSubmit(this._data);
+      this._callback.formSubmit(EventEditView.transformDataToEvent(this._data));
     }
   }
 
@@ -398,7 +397,7 @@ export default class EventEditView extends SmartView {
   }
 
   _favoriteClickHandler() {
-    this.updateDate(
+    this.updateData(
         {
           isFavorite: !this._data.isFavorite
         },
@@ -415,7 +414,7 @@ export default class EventEditView extends SmartView {
     this.getElement().querySelector(`.event__type-toggle`).checked = false;
 
     const offers = this._offers.get(type);
-    this.updateDate({type, offers});
+    this.updateData({type, offers});
   }
 
   _eventCityChangeHandler(evt) {
@@ -428,7 +427,7 @@ export default class EventEditView extends SmartView {
 
     if (destination) {
       const {description, photos} = destination;
-      this.updateDate(
+      this.updateData(
           {
             city: newCity,
             destination: description,
@@ -436,7 +435,7 @@ export default class EventEditView extends SmartView {
           }
       );
     } else {
-      this.updateDate(
+      this.updateData(
           {
             city: newCity,
           }
@@ -455,7 +454,7 @@ export default class EventEditView extends SmartView {
     const offer = offers.find((it) => it.title === evt.target.name);
     offer.checked = !offer.checked;
 
-    this.updateDate({offers}, true);
+    this.updateData({offers}, true);
   }
 
   _eventPriceChangeHandler(evt) {
@@ -463,7 +462,7 @@ export default class EventEditView extends SmartView {
       return;
     }
 
-    this.updateDate(
+    this.updateData(
         {
           price: parseInt(evt.target.value, 10),
         },
@@ -479,11 +478,11 @@ export default class EventEditView extends SmartView {
 
     this._endDatepicker.set(`minDate`, timeStart);
     this._endDatepicker.setDate(timeEnd);
-    this.updateDate({timeStart, timeEnd}, true);
+    this.updateData({timeStart, timeEnd}, true);
   }
 
   _endDateChangeHandler([userDate]) {
-    this.updateDate(
+    this.updateData(
         {
           timeEnd: new Date(userDate)
         },
@@ -493,6 +492,22 @@ export default class EventEditView extends SmartView {
 
   _deleteButtonClickHandler(evt) {
     evt.preventDefault();
-    this._callback.eventDelete(UserAction.DELETE_EVENT, this._data);
+    this._callback.eventDelete(EventEditView.transformDataToEvent(this._data));
+  }
+
+  static transformEventToData(event) {
+    return Object.assign(event, {
+      isDisabled: false,
+      isSaving: false,
+      isDeleting: false
+    });
+  }
+
+  static transformDataToEvent(data) {
+    delete data.isDisabled;
+    delete data.isSaving;
+    delete data.isDeleting;
+
+    return data;
   }
 }
