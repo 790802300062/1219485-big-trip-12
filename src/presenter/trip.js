@@ -256,7 +256,7 @@ export default class TripPresenter extends EventsPresenter {
         this._existEventPresenters[event.id].setFormViewStatus(FormStatus.SAVING);
         this._api.updateEvent(event)
           .then((response) => {
-            this._eventsModel.updateEvent(response);
+            this._eventsModel.updateExstingEvent(response);
           })
           .catch(() => {
             this._existEventPresenters[event.id].setFormViewStatus(FormStatus.ABORTING);
@@ -266,7 +266,7 @@ export default class TripPresenter extends EventsPresenter {
         this._existEventPresenters[event.id].setFormViewStatus(FormStatus.DELETING);
         this._api.deleteEvent(event)
           .then(() => {
-            this._eventsModel.deleteEvent(event);
+            this._eventsModel.deleteExistingEvent(event);
           })
           .catch(() => {
             this._existEventPresenters[event.id].setFormViewStatus(FormStatus.ABORTING);
@@ -276,7 +276,7 @@ export default class TripPresenter extends EventsPresenter {
         this._newEventPresenter.setFormViewStatus(FormStatus.SAVING);
         this._api.addEvent(event)
           .then((response) => {
-            this._eventsModel.addEvent(response);
+            this._eventsModel.addNewEvent(response);
           })
           .catch(() => {
             this._newEventPresenter.setFormViewStatus(FormStatus.ABORTING);

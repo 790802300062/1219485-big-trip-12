@@ -20,25 +20,25 @@ import EventsModel from './model/events.js';
 import FiltersModel from './model/filters.js';
 import Api from './api.js';
 
-const tripInfoPosition = document.querySelector(`.trip-main`);
-const menuPosition = tripInfoPosition.querySelector(`.menu-position`);
-const filtersPosition = tripInfoPosition.querySelector(`.filters-position`);
-const eventsContainerPosition = document.querySelector(`.trip-events`);
-const sortAndContentPosition = eventsContainerPosition.querySelector(`.sort-content-position`);
-const newEventButtonPosition = tripInfoPosition.querySelector(`.trip-main__event-add-btn`);
+const tripInfoNode = document.querySelector(`.trip-main`);
+const menuNode = tripInfoNode.querySelector(`.menu-position`);
+const filtersNode = tripInfoNode.querySelector(`.filters-position`);
+const eventsContainerNode = document.querySelector(`.trip-events`);
+const sortAndContentNode = eventsContainerNode.querySelector(`.sort-content-position`);
+const newEventButtonNode = tripInfoNode.querySelector(`.trip-main__event-add-btn`);
 
 const api = new Api(END_POINT, AUTHORIZATION);
 const offersModel = new OffersModel();
 const eventsModel = new EventsModel(offersModel);
 const filtersModel = new FiltersModel();
 const menuComponent = new MenuView();
-const filtersPresenter = new FiltersPreseter(filtersPosition, eventsModel, filtersModel);
-const tripPresenter = new TripPresenter(eventsContainerPosition, sortAndContentPosition,
+const filtersPresenter = new FiltersPreseter(filtersNode, eventsModel, filtersModel);
+const tripPresenter = new TripPresenter(eventsContainerNode, sortAndContentNode,
     eventsModel, offersModel, filtersModel, api);
-const informationPresenter = new TripInfoPresenter(tripInfoPosition, eventsModel, filtersModel);
-const statisticsPresenter = new StatisticsPresenter(eventsContainerPosition, eventsModel);
+const informationPresenter = new TripInfoPresenter(tripInfoNode, eventsModel, filtersModel);
+const statisticsPresenter = new StatisticsPresenter(eventsContainerNode, eventsModel);
 
-newEventButtonPosition.disabled = true;
+newEventButtonNode.disabled = true;
 
 informationPresenter.init();
 tripPresenter.init();
@@ -61,11 +61,11 @@ Promise.all([
   });
 
 const enableMenu = () => {
-  render(menuPosition, menuComponent, RenderPosition.AFTEREND);
+  render(menuNode, menuComponent, RenderPosition.AFTEREND);
 
   menuComponent.setMenuItemClickHandler(handleMenuClick);
-  newEventButtonPosition.addEventListener(`click`, newEventButtonClickHandler);
-  newEventButtonPosition.disabled = false;
+  newEventButtonNode.addEventListener(`click`, newEventButtonClickHandler);
+  newEventButtonNode.disabled = false;
 };
 
 const newEventButtonClickHandler = (evt) => {
@@ -75,7 +75,7 @@ const newEventButtonClickHandler = (evt) => {
 };
 
 const newEventFormCloseHandler = () => {
-  newEventButtonPosition.disabled = false;
+  newEventButtonNode.disabled = false;
 };
 
 const handleMenuClick = (menuItem) => {
@@ -87,7 +87,7 @@ const handleMenuClick = (menuItem) => {
       tripPresenter.init();
       filtersPresenter.init();
       tripPresenter.createEvent(newEventFormCloseHandler);
-      newEventButtonPosition.disabled = true;
+      newEventButtonNode.disabled = true;
       break;
     case MenuItem.TABLE:
       statisticsPresenter.destroy();

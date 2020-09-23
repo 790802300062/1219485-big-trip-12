@@ -31,7 +31,7 @@ export default class EventsModel extends Observer {
     });
   }
 
-  updateEvent(update) {
+  updateExistingEvent(update) {
     const index = this._events.findIndex((event) => event.id === update.id);
 
     if (index === -1) {
@@ -44,14 +44,14 @@ export default class EventsModel extends Observer {
     this._notify(EventType.EVENT, update);
   }
 
-  addEvent(update) {
+  addNewEvent(update) {
     this._events.push(update);
     this._events = this._sortEvents(this._events);
 
     this._notify(EventType.EVENT, update);
   }
 
-  deleteEvent(update) {
+  deleteExistingEvent(update) {
     const index = this._events.findIndex((event) => event.id === update.id);
 
     if (index === -1) {
