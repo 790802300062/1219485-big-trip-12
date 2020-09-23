@@ -3,7 +3,8 @@ import {formatDateAndTime} from '../utils/time-and-date.js';
 import {
   determineEventPreposition,
   isInputTag,
-  makeFirstLetterUppercased
+  makeFirstLetterUppercased,
+  isOnline
 } from '../utils/common.js';
 
 import SmartView from '../view/smart.js';
@@ -192,9 +193,9 @@ export default class EventEditView extends SmartView {
       ? (
         `<div class="event__photos-container">
           <div class="event__photos-tape">
-            ${photos.map((photo) => `
+            ${photos.map((photo, index) => `
               <img class="event__photo"
-                src="${photo.src}"
+                src="${isOnline() ? photo.src : `./img/photos/${Math.min(index + 1, 5)}.jpg`}"
                 alt="${photo.description}">`)
                 .join(``)}
           </div>

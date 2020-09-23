@@ -1,4 +1,4 @@
-import EventsModel from './model/events.js';
+import EventsModel from '../model/events.js';
 
 const Method = {
   GET: `GET`,
@@ -68,6 +68,16 @@ export default class Api {
   getOffers() {
     return this._load({url: Url.OFFERS})
     .then(Api.toJSON);
+  }
+
+  sync(data) {
+    return this._load({
+      url: Url.EVENTS + `/sync`,
+      method: Method.POST,
+      body: JSON.stringify(data),
+      headers: new Headers({"Content-Type": `application/json`})
+    })
+      .then(Api.toJSON);
   }
 
   _load({url, method = Method.GET, body = null, headers = new Headers()}) {

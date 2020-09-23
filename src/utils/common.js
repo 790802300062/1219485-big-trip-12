@@ -26,3 +26,7 @@ export const determineEventPreposition = (eventType) => {
 export const isEscEvent = (evt) => {
   return evt.key === ESC_KEY;
 };
+
+export const isOnline = () => {
+  return window.navigator.onLine;
+};

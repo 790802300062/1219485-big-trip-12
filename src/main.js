@@ -18,9 +18,14 @@ import StatisticsPresenter from './presenter/statistics.js';
 import OffersModel from './model/offers.js';
 import EventsModel from './model/events.js';
 import FiltersModel from './model/filters.js';
-import Api from './api.js';
+import Api from './api/index.js';
+import Store from './api/store.js';
+import Provider from './api/provider.js';
 
 const SW_ERROR_MESSAGE = `ServiceWorker isn't available`;
+const STORE_PREFIX = `bigtrip-localstorage`;
+const STORE_VER = `v12`;
+const STORE_NAME = `${STORE_PREFIX}-${STORE_VER}`;
 
 const tripInfoNode = document.querySelector(`.trip-main`);
 const menuNode = tripInfoNode.querySelector(`.menu-position`);
@@ -30,13 +35,16 @@ const sortAndContentNode = eventsContainerNode.querySelector(`.sort-content-posi
 const newEventButtonNode = tripInfoNode.querySelector(`.trip-main__event-add-btn`);
 
 const api = new Api(END_POINT, AUTHORIZATION);
+const store = new Store(STORE_NAME, window.localStorage);
+const apiWithProvider = new Provider(api, store);
+
 const offersModel = new OffersModel();
 const eventsModel = new EventsModel(offersModel);
 const filtersModel = new FiltersModel();
 const menuComponent = new MenuView();
 const filtersPresenter = new FiltersPreseter(filtersNode, eventsModel, filtersModel);
 const tripPresenter = new TripPresenter(eventsContainerNode, sortAndContentNode,
-    eventsModel, offersModel, filtersModel, api);
+    eventsModel, offersModel, filtersModel, apiWithProvider);
 const informationPresenter = new TripInfoPresenter(tripInfoNode, eventsModel, filtersModel);
 const statisticsPresenter = new StatisticsPresenter(eventsContainerNode, eventsModel);
 
@@ -47,9 +55,9 @@ tripPresenter.init();
 filtersPresenter.init();
 
 Promise.all([
-  api.getOffers(),
-  api.getDestinations(),
-  api.getEvents(),
+  apiWithProvider.getOffers(),
+  apiWithProvider.getDestinations(),
+  apiWithProvider.getEvents(),
 ])
   .then(([offers, destinations, events]) => {
     offersModel.setOffersFromServer(offers);
@@ -106,7 +114,17 @@ const handleMenuClick = (menuItem) => {
 
 window.addEventListener(`load`, () => {
   navigator.serviceWorker.register(`/sw.js`)
+    .then(() => {})
     .catch(() => {
       throw new Error(SW_ERROR_MESSAGE);
     });
+});
+
+window.addEventListener(`online`, () => {
+  document.title = document.title.replace(` [offline]`, ``);
+  apiWithProvider.sync();
+});
+
+window.addEventListener(`offline`, () => {
+  document.title += ` [offline]`;
 });
