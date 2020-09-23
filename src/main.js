@@ -32,7 +32,7 @@ const offersModel = new OffersModel();
 const eventsModel = new EventsModel(offersModel);
 const filtersModel = new FiltersModel();
 const menuComponent = new MenuView();
-const filtersPreseter = new FiltersPreseter(filtersPosition, eventsModel, filtersModel);
+const filtersPresenter = new FiltersPreseter(filtersPosition, eventsModel, filtersModel);
 const tripPresenter = new TripPresenter(eventsContainerPosition, sortAndContentPosition,
     eventsModel, offersModel, filtersModel, api);
 const informationPresenter = new TripInfoPresenter(tripInfoPosition, eventsModel, filtersModel);
@@ -42,7 +42,7 @@ newEventButtonPosition.disabled = true;
 
 informationPresenter.init();
 tripPresenter.init();
-filtersPreseter.init();
+filtersPresenter.init();
 
 Promise.all([
   api.getOffers(),
@@ -85,15 +85,19 @@ const handleMenuClick = (menuItem) => {
       tripPresenter.destroy();
       filtersModel.setFilter(FilterType.EVERYTHING);
       tripPresenter.init();
+      filtersPresenter.init();
       tripPresenter.createEvent(newEventFormCloseHandler);
       newEventButtonPosition.disabled = true;
       break;
     case MenuItem.TABLE:
       statisticsPresenter.destroy();
       tripPresenter.init();
+      filtersPresenter.init();
       break;
     case MenuItem.STATS:
       tripPresenter.destroy();
+      filtersModel.setFilter(FilterType.EVERYTHING);
+      filtersPresenter.init(false);
       statisticsPresenter.init();
   }
 };

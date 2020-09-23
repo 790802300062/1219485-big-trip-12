@@ -12,6 +12,7 @@ export default class FiltersPreseter {
     this._header = filterHeader;
     this._eventsModel = eventsModel;
     this._filtersModel = filtersModel;
+    this._filterComponent = null;
 
     this._changeTypeFilter = this._changeTypeFilter.bind(this);
     this._updateView = this._updateView.bind(this);
@@ -20,10 +21,16 @@ export default class FiltersPreseter {
     this._eventsModel.addObserver(this._updateView);
   }
 
-  init() {
+  init(filtersStatus = true) {
+    if (this._filterComponent) {
+      remove(this._filterComponent);
+      this._filterComponent = null;
+    }
+
     this._filterComponent = new FilterView(
         this._filtersModel.getFilter(),
-        this._getFiltersCount()
+        this._getFiltersCount(),
+        filtersStatus
     );
 
     this._filterComponent.setFilterTypeChangeHandler(this._changeTypeFilter);
@@ -48,7 +55,6 @@ export default class FiltersPreseter {
   }
 
   _updateView() {
-    remove(this._filterComponent);
     this.init();
   }
 }

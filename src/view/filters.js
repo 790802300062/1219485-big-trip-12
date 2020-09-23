@@ -4,10 +4,11 @@ import {isInputTag} from '../utils/common.js';
 import Abstract from '../view/abstract.js';
 
 export default class FilterView extends Abstract {
-  constructor(currentFilterType, filters) {
+  constructor(currentFilterType, filters, filtersStatus) {
     super();
     this._currentFilterType = currentFilterType;
     this._filters = filters;
+    this._filtersStatus = filtersStatus;
 
     this._filterTypeChangeHandler = this._filterTypeChangeHandler.bind(this);
   }
@@ -18,7 +19,7 @@ export default class FilterView extends Abstract {
         return this._createFilterItemsTemplate(
             filter,
             filter === this._currentFilterType,
-            Boolean(this._filters[filter])
+            this._filtersStatus && Boolean(this._filters[filter])
         );
       })
       .join(``);
