@@ -20,6 +20,8 @@ import EventsModel from './model/events.js';
 import FiltersModel from './model/filters.js';
 import Api from './api.js';
 
+const SW_ERROR_MESSAGE = `ServiceWorker isn't available`;
+
 const tripInfoNode = document.querySelector(`.trip-main`);
 const menuNode = tripInfoNode.querySelector(`.menu-position`);
 const filtersNode = tripInfoNode.querySelector(`.filters-position`);
@@ -101,3 +103,10 @@ const handleMenuClick = (menuItem) => {
       statisticsPresenter.init();
   }
 };
+
+window.addEventListener(`load`, () => {
+  navigator.serviceWorker.register(`/sw.js`)
+    .catch(() => {
+      throw new Error(SW_ERROR_MESSAGE);
+    });
+});
