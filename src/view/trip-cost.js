@@ -25,9 +25,7 @@ export default class TripCostView extends Abstract {
 
       if (event.offers) {
         for (const offer of event.offers) {
-          if (offer.checked) {
-            totalTripCost += offer.price;
-          }
+          totalTripCost += offer.price;
         }
       }
     }

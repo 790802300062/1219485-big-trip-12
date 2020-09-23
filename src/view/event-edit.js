@@ -36,16 +36,13 @@ const FLATPICKR_PROPERTIES = {
 };
 
 export default class EventEditView extends SmartView {
-  constructor(destinations, offers, event) {
+  constructor(destinations, offersByType, event) {
     super();
     this._destinations = destinations;
-    this._offers = offers;
+    this._offersByType = offersByType;
 
     if (!event) {
       event = BLANK_EVENT;
-      if (this._offers.size > 0) {
-        event.offers = this._offers.get(event.type);
-      }
       this._isEventNew = true;
     }
 
@@ -138,34 +135,41 @@ export default class EventEditView extends SmartView {
       : ``;
   }
 
-  _createTripOffersTemplate() {
-    const {offers, isDisabled} = this._data;
+  _createInnerPartOfOffersSectionTemplate() {
+    const {type, offers, isDisabled} = this._data;
 
-    return offers.length
-      ? (
-        `<section class="event__section event__section--offers">
-          <h3 class="event__section-title event__section-title--offers">Offers</h3>
-          <div class="event__available-offers">
-          ${offers.map((offer) => {
-          return (
-            `<div class="event__offer-selector">
-              <input class="event__offer-checkbox visually-hidden"
-              id="event-offer-${offer.title}-1" type="checkbox" name="${offer.title}"
-              ${offer.checked ? `checked` : ``} ${isDisabled ? `disabled` : ``}>
+    const offersList = this._offersByType.get(type);
+    const checkedOffers = offers.reduce((result, offer) => {
+      return result.set(offer.title, offer);
+    }, new Map());
 
-              <label class="event__offer-label" for="event-offer-${offer.title}-1">
-                <span class="event__offer-title">${offer.title}</span>
-                &plus;&euro;&nbsp;
-                <span class="event__offer-price">${offer.price}</span>
-              </label>
-            </div>`
-          );
-        }).join(``)}
-          </div>
-        </section>`
-      )
-      : ``;
+    return offersList.map((offer) => {
+      return (
+       `<div class="event__offer-selector">
+          <input class="event__offer-checkbox visually-hidden" id="event-offer-${offer.title}-1" type="checkbox"
+            name="${offer.title}" ${checkedOffers.has(offer.title) ? `checked` : ``} ${isDisabled ? `disabled` : ``}>
+          <label class="event__offer-label" for="event-offer-${offer.title}-1">
+            <span class="event__offer-title">${offer.title}</span>
+            &plus;&euro;&nbsp;
+            <span class="event__offer-price">${offer.price}</span>
+          </label>
+        </div>`
+      );
+    })
+    .join(``);
   }
+
+  _createTripOffersSectionTemplate() {
+    return (
+      `<section class="event__section event__section--offers">
+        <h3 class="event__section-title event__section-title--offers">Offers</h3>
+        <div class="event__available-offers">
+          ${this._createInnerPartOfOffersSectionTemplate()}
+        </div>
+      </section>`
+    );
+  }
+
 
   _createTripDestinationDescriptionTemplate() {
     const {destination, photos} = this._data;
@@ -200,12 +204,15 @@ export default class EventEditView extends SmartView {
   }
 
   _createTripDetailsTemplate() {
-    const {offers, destination, photos} = this._data;
+    const {destination, photos} = this._data;
+
+    const existingOffers = (this._offersByType && this._offersByType.get(this._data.type)
+      && this._offersByType.get(this._data.type).length);
+
     return ((destination && destination.length)
-     || (photos && photos.length)
-     || (offers && offers.length))
+     || (photos && photos.length) || existingOffers)
       ? (`<section class="event__details">
-          ${this._createTripOffersTemplate()}
+          ${this._createTripOffersSectionTemplate()}
           ${this._createTripDestinationDescriptionTemplate()}
         </section>`
       )
@@ -335,7 +342,8 @@ export default class EventEditView extends SmartView {
     this.getElement().querySelector(`.${HTML_CLASS.PRICE}`)
       .addEventListener(`change`, this._eventPriceChangeHandler);
 
-    if (this._data.offers && this._data.offers.length) {
+      if (this._offersByType && this._offersByType.get(this._data.type)
+        && this._offersByType.get(this._data.type).length) {
       this.getElement().querySelector(`.event__available-offers`)
         .addEventListener(`click`, this._offersChangeHandler);
     }
@@ -413,8 +421,7 @@ export default class EventEditView extends SmartView {
     const type = makeFirstLetterUppercased(evt.target.value);
     this.getElement().querySelector(`.event__type-toggle`).checked = false;
 
-    const offers = this._offers.get(type);
-    this.updateData({type, offers});
+    this.updateData({type});
   }
 
   _eventCityChangeHandler(evt) {
@@ -451,8 +458,17 @@ export default class EventEditView extends SmartView {
     }
 
     const offers = this._data.offers.map((offer) => Object.assign({}, offer));
-    const offer = offers.find((it) => it.title === evt.target.name);
-    offer.checked = !offer.checked;
+    const offerIndex = offers.findIndex((it) => it.title === evt.target.name);
+
+    if (offerIndex < 0) {
+      const offersList = this._offersByType.get(this._data.type);
+      const newOffer = offersList.find((it) => it.title === evt.target.name);
+      if (newOffer) {
+        offers.push(newOffer);
+      }
+    } else {
+      offers.splice(offerIndex, 1);
+    }
 
     this.updateData({offers}, true);
   }

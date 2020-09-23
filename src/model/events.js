@@ -15,6 +15,12 @@ export default class EventsModel extends Observer {
     return this._events;
   }
 
+  setEvents(events) {
+    this._events = this._sortEvents(events);
+
+    this._notify(EventType.INIT, events);
+  }
+
   getDestinations() {
     return this._destinations;
   }
@@ -23,12 +29,6 @@ export default class EventsModel extends Observer {
     destinations.forEach(({name, description, pictures}) => {
       this._destinations.set(name, {description, photos: pictures});
     });
-  }
-
-  setEvents(events) {
-    this._events = this._sortEvents(events.map(this._adaptToClient.bind(this)));
-
-    this._notify(EventType.INIT, events);
   }
 
   updateEvent(update) {
@@ -63,13 +63,16 @@ export default class EventsModel extends Observer {
     this._notify(EventType.EVENT, update);
   }
 
-  _adaptToClient(event) {
+  _sortEvents(events) {
+    return events.slice().sort((a, b) => a.timeStart - b.timeStart);
+  }
+
+  static adaptToClient(event) {
     return {
       id: event.id,
       type: makeFirstLetterUppercased(event.type),
       city: event.destination.name,
-      offers: this._offersModel.adaptOffersToClient(makeFirstLetterUppercased(event.type),
-          event.offers),
+      offers: event.offers,
       timeStart: new Date(event.date_from),
       timeEnd: new Date(event.date_to),
       price: event.base_price,
@@ -79,7 +82,7 @@ export default class EventsModel extends Observer {
     };
   }
 
-  adaptToServer(event) {
+  static adaptToServer(event) {
     return {
       'id': event.id,
       'type': event.type.toLowerCase(),
@@ -92,11 +95,9 @@ export default class EventsModel extends Observer {
         'name': event.city,
         'pictures': event.photos
       },
-      'offers': this._offersModel.adaptOffersToServer(event.offers)
+      'offers': event.offers
     };
   }
 
-  _sortEvents(events) {
-    return events.slice().sort((a, b) => a.timeStart - b.timeStart);
-  }
+
 }

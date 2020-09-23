@@ -254,9 +254,9 @@ export default class TripPresenter extends EventsPresenter {
     switch (userAction) {
       case UserAction.UPDATE_EVENT:
         this._existEventPresenters[event.id].setFormViewStatus(FormStatus.SAVING);
-        this._api.updateEvent(this._eventsModel.adaptToServer(event))
+        this._api.updateEvent(event)
           .then((response) => {
-            this._eventsModel.updateEvent(this._eventsModel._adaptToClient(response));
+            this._eventsModel.updateEvent(response);
         })
           .catch(() => {
             this._existEventPresenters[event.id].setFormViewStatus(FormStatus.ABORTING);
@@ -264,7 +264,7 @@ export default class TripPresenter extends EventsPresenter {
         break;
       case UserAction.DELETE_EVENT:
         this._existEventPresenters[event.id].setFormViewStatus(FormStatus.DELETING);
-        this._api.deleteEvent(this._eventsModel.adaptToServer(event))
+        this._api.deleteEvent(event)
           .then(() => {
             this._eventsModel.deleteEvent(event);
           })
@@ -274,9 +274,9 @@ export default class TripPresenter extends EventsPresenter {
         break;
       case UserAction.ADD_EVENT:
         this._newEventPresenter.setFormViewStatus(FormStatus.SAVING);
-        this._api.addEvent(this._eventsModel.adaptToServer(event))
+        this._api.addEvent(event)
           .then((response) => {
-            this._eventsModel.addEvent(this._eventsModel._adaptToClient(response));
+            this._eventsModel.addEvent(response);
           })
           .catch(() => {
             this._newEventPresenter.setFormViewStatus(FormStatus.ABORTING);

@@ -13,9 +13,10 @@ import Abstract from '../view/abstract.js';
 const MAX_OFFERS_AMOUNT = 3;
 
 export default class EventView extends Abstract {
-  constructor(event) {
+  constructor(offersByType, event) {
     super();
     this._event = event;
+    this._offersByType = offersByType;
     this._editClickHandler = this._editClickHandler.bind(this);
   }
 
@@ -73,7 +74,7 @@ export default class EventView extends Abstract {
   _createEventOffersTemplate() {
     let eventOffers = [];
     eventOffers = this._event.offers.map((offer) => {
-      return offer.checked
+      return offer
         ? (
           `<li class="event__offer">
             <span class="event__offer-title">${offer.title}</span>

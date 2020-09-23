@@ -49,7 +49,7 @@ export default class EventPresenter {
     const prevEventComponent = this._eventComponent;
     const prevEventEditComponent = this._eventEditComponent;
 
-    this._eventComponent = new EventView(event);
+    this._eventComponent = new EventView(this._offersModel.getOffers(), event);
     this._eventEditComponent = new EventEditView(
         this._eventsModel.getDestinations(),
         this._offersModel.getOffers(),
