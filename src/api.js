@@ -7,14 +7,20 @@ const Method = {
   DELETE: `DELETE`
 };
 
+const Url = {
+  EVENTS: `points`,
+  DESTINATIONS: `destinations`,
+  OFFERS: `offers`
+}
+
 export default class Api {
-  constructor(endEvent, authorization) {
-    this._endEvent = endEvent;
+  constructor(endPoint, authorization) {
+    this._endPoint = endPoint;
     this._authorization = authorization;
   }
 
   getEvents() {
-    return this._load({url: `points`})
+    return this._load({url: Url.EVENTS})
       .then(Api.toJSON)
       .then((serverEvents) => serverEvents.map(EventsModel.adaptToClient));
   }
@@ -22,7 +28,7 @@ export default class Api {
   addEvent(event) {
     return this._load(
         {
-          url: `points`,
+          url: Url.EVENTS,
           method: Method.POST,
           body: JSON.stringify(EventsModel.adaptToServer(event)),
           headers: new Headers({"Content-Type": `application/json`})
@@ -35,7 +41,7 @@ export default class Api {
   updateEvent(event) {
     return this._load(
         {
-          url: `points/${event.id}`,
+          url: Url.EVENTS+`/${event.id}`,
           method: Method.PUT,
           body: JSON.stringify(EventsModel.adaptToServer(event)),
           headers: new Headers({"Content-Type": `application/json`})
@@ -48,26 +54,26 @@ export default class Api {
   deleteEvent(event) {
     return this._load(
         {
-          url: `points/${event.id}`,
+          url: Url.EVENTS+`/${event.id}`,
           method: Method.DELETE,
         }
     );
   }
 
   getDestinations() {
-    return this._load({url: `destinations`})
+    return this._load({url: Url.DESTINATIONS})
       .then(Api.toJSON);
   }
 
   getOffers() {
-    return this._load({url: `offers`})
+    return this._load({url: Url.OFFERS})
     .then(Api.toJSON);
   }
 
   _load({url, method = Method.GET, body = null, headers = new Headers()}) {
     headers.append(`Authorization`, this._authorization);
 
-    return fetch(`${this._endEvent}/${url}`, {method, body, headers})
+    return fetch(`${this._endPoint}/${url}`, {method, body, headers})
       .then(Api.checkStatus)
       .catch(Api.catchError);
   }
