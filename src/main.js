@@ -22,9 +22,8 @@ import Api from './api/index.js';
 import Store from './api/store.js';
 import Provider from './api/provider.js';
 
-const SW_ERROR_MESSAGE = `ServiceWorker isn't available`;
-const STORE_PREFIX = `bigtrip-localstorage`;
-const STORE_VER = `v12`;
+const STORE_PREFIX = `bigTrip-localstorage`;
+const STORE_VER = `v12.0`;
 const STORE_NAME = `${STORE_PREFIX}-${STORE_VER}`;
 
 const tripInfoNode = document.querySelector(`.trip-main`);

@@ -1,5 +1,5 @@
-const CACHE_PREFIX = `bigtrip-cache`;
-const CACHE_VER = `v120`;
+const CACHE_PREFIX = `bigTrip-cache`;
+const CACHE_VER = `v12.0`;
 const CACHE_NAME = `${CACHE_PREFIX}-${CACHE_VER}`;
 
 const HTTP_STATUS_OK = 200;
