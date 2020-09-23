@@ -146,18 +146,18 @@ export default class EventEditView extends SmartView {
 
     return offersList
       .map((offer) => {
-      return (
-        `<div class="event__offer-selector">
-          <input class="event__offer-checkbox visually-hidden" id="event-offer-${offer.title}-1" type="checkbox"
-            name="${offer.title}" ${checkedOffers.has(offer.title) ? `checked` : ``} ${isDisabled ? `disabled` : ``}>
-          <label class="event__offer-label" for="event-offer-${offer.title}-1">
-            <span class="event__offer-title">${offer.title}</span>
-            &plus;&euro;&nbsp;
-            <span class="event__offer-price">${offer.price}</span>
-          </label>
-        </div>`
-      );
-    })
+        return (
+          `<div class="event__offer-selector">
+            <input class="event__offer-checkbox visually-hidden" id="event-offer-${offer.title}-1" type="checkbox"
+              name="${offer.title}" ${checkedOffers.has(offer.title) ? `checked` : ``} ${isDisabled ? `disabled` : ``}>
+            <label class="event__offer-label" for="event-offer-${offer.title}-1">
+              <span class="event__offer-title">${offer.title}</span>
+              &plus;&euro;&nbsp;
+              <span class="event__offer-price">${offer.price}</span>
+            </label>
+          </div>`
+        );
+      })
     .join(``);
   }
 
