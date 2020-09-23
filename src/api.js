@@ -11,7 +11,7 @@ const Url = {
   EVENTS: `points`,
   DESTINATIONS: `destinations`,
   OFFERS: `offers`
-}
+};
 
 export default class Api {
   constructor(endPoint, authorization) {
@@ -41,7 +41,7 @@ export default class Api {
   updateEvent(event) {
     return this._load(
         {
-          url: Url.EVENTS+`/${event.id}`,
+          url: Url.EVENTS + `/${event.id}`,
           method: Method.PUT,
           body: JSON.stringify(EventsModel.adaptToServer(event)),
           headers: new Headers({"Content-Type": `application/json`})
@@ -54,7 +54,7 @@ export default class Api {
   deleteEvent(event) {
     return this._load(
         {
-          url: Url.EVENTS+`/${event.id}`,
+          url: Url.EVENTS + `/${event.id}`,
           method: Method.DELETE,
         }
     );
