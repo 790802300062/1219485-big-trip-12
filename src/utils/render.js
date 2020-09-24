@@ -1,4 +1,4 @@
-import Abstract from '../view/abstract.js';
+import AbstractView from "../view/abstract.js";
 
 export const RenderPosition = {
   AFTERBEGIN: `afterbegin`,
@@ -7,11 +7,11 @@ export const RenderPosition = {
 };
 
 export const render = (container, element, place) => {
-  if (container instanceof Abstract) {
+  if (container instanceof AbstractView) {
     container = container.getElement();
   }
 
-  if (element instanceof Abstract) {
+  if (element instanceof AbstractView) {
     element = element.getElement();
   }
 
@@ -25,15 +25,9 @@ export const render = (container, element, place) => {
     case RenderPosition.AFTEREND:
       container.insertAdjacentElement(place, element);
       break;
+    default:
+      throw new Error(`Impossible to determine the position to render`)
   }
-};
-
-export const renderTemplate = (container, template, place) => {
-  if (container instanceof Abstract) {
-    container = container.getElement();
-  }
-
-  container.insertAdjacentHTML(place, template);
 };
 
 export const createElement = (template) => {
@@ -44,11 +38,11 @@ export const createElement = (template) => {
 };
 
 export const replace = (newChild, oldChild) => {
-  if (oldChild instanceof Abstract) {
+  if (oldChild instanceof AbstractView) {
     oldChild = oldChild.getElement();
   }
 
-  if (newChild instanceof Abstract) {
+  if (newChild instanceof AbstractView) {
     newChild = newChild.getElement();
   }
 
@@ -66,7 +60,7 @@ export const remove = (component) => {
     return;
   }
 
-  if (!(component instanceof Abstract)) {
+  if (!(component instanceof AbstractView)) {
     throw new Error(`Can remove only components`);
   }
 
@@ -80,11 +74,11 @@ export const append = (container, element) => {
     throw new Error(`Can't append unexisting elements`);
   }
 
-  if (container instanceof Abstract) {
+  if (container instanceof AbstractView) {
     container = container.getElement();
   }
 
-  if (element instanceof Abstract) {
+  if (element instanceof AbstractView) {
     element = element.getElement();
   }
 

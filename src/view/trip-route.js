@@ -1,9 +1,10 @@
 import {getTripDatesInterval} from '../utils/time-and-date.js';
-import Abstract from '../view/abstract.js';
 
-const MAX_CITIES_AMOUNT = 3;
+import AbstractView from '../view/abstract.js';
 
-export default class TripRouteView extends Abstract {
+const LIMIT_ROUTE_CITY = 3;
+
+export default class TripRouteView extends AbstractView {
   constructor(events) {
     super();
     this._events = events;
@@ -15,6 +16,7 @@ export default class TripRouteView extends Abstract {
         <h1 class="trip-info__title">
           ${this._getTripRoute()}
         </h1>
+
         <p class="trip-info__dates">${getTripDatesInterval(this._events)}</p>
       </div>`
     );
@@ -22,18 +24,18 @@ export default class TripRouteView extends Abstract {
 
   _getTripRoute() {
     const events = this._events;
-    const tripRoute = [];
+    const route = [];
 
     for (const event of events) {
-      if (tripRoute[tripRoute.length - 1] !== event.city) {
-        tripRoute.push(event.city);
+      if (route[route.length - 1] !== event.city) {
+        route.push(event.city);
       }
 
-      if (tripRoute.length > MAX_CITIES_AMOUNT) {
+      if (route.length > LIMIT_ROUTE_CITY) {
         return `${events[0].city} &mdash; ... &mdash; ${events[events.length - 1].city}`;
       }
     }
 
-    return tripRoute.join(` &mdash; `);
+    return route.join(` &mdash; `);
   }
 }

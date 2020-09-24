@@ -1,74 +1,44 @@
 import {EVENT_TYPES} from '../const.js';
 
 const ESC_KEY = `Escape`;
-const PHOTOS_LIMIT = 5;
 
 const TagName = {
   INPUT: `INPUT`,
   LINK: `A`
 };
 
-const isTagName = (evt, tag) => evt.target.tagName === tag;
+const isTagName = (evt, tag) => {
+  return evt.target.tagName === tag;
+};
 
-export const isInputTag = (evt) => isTagName(evt, TagName.INPUT);
-export const isLinkTag = (evt) => isTagName(evt, TagName.LINK);
+export const isInputTag = (evt) => {
+  return isTagName(evt, TagName.INPUT);
+};
 
-export const makeFirstLetterUppercased = (sentence) => sentence[0].toUpperCase() + sentence.slice(1).toLowerCase();
-export const getEventDuration = (event) => event.timeEnd - event.timeStart;
+export const isLinkTag = (evt) => {
+  return isTagName(evt, TagName.LINK);
+};
 
-export const determineEventPreposition = (eventType) => {
-  if (EVENT_TYPES.get(`Activity`).includes(eventType)) {
-    return `${eventType} in`;
+export const generateEventPreposition = (type) => {
+  if (EVENT_TYPES.get(`Activity`).includes(type)) {
+    return `${type} in`;
   }
 
-  return `${eventType} to`;
-};
-
-const shuffleArray = (arr) => {
-  return arr.slice().sort(() => {
-    return 0.5 - Math.random();
-  });
-};
-
-
-export const getRandomInteger = (a = 0, b = 1) => {
-  const lower = Math.ceil(Math.min(a, b));
-  const upper = Math.floor(Math.max(a, b));
-
-  return Math.floor(lower + Math.random() * (upper - lower + 1));
-};
-
-export const getRandomSubArray = (arr, length = arr.length) => {
-  // Проверка допустимости использования переданного числа вместо длины массива
-  length = Math.min(length, arr.length);
-
-  const half = Math.floor(length / 2);
-  const start = getRandomInteger(0, half);
-  const end = getRandomInteger(half, length);
-
-  return shuffleArray(arr).slice(start, end);
-};
-
-export const getRandomElement = (list) => {
-  const randomIndex = getRandomInteger(0, list.length - 1);
-
-  return list[randomIndex];
+  return `${type} to`;
 };
 
 export const isEscEvent = (evt) => {
   return evt.key === ESC_KEY;
 };
 
-export const generateId = () => Date.now() + parseInt(Math.random() * 10000, 10);
-
-export const generatePhotos = () => {
-  return new Array(getRandomInteger(0, PHOTOS_LIMIT))
-    .fill()
-    .map(() => {
-      return {
-        src: `http://picsum.photos/248/152?r=${Math.random()}`,
-        description: `Event photo`
-      };
-    });
+export const getDuration = (event) => {
+  return event.timeEnd - event.timeStart;
 };
 
+export const makeFirstLetterUppercased = (sentence) => {
+  return sentence[0].toUpperCase() + sentence.slice(1).toLowerCase();
+};
+
+export const isOnline = () => {
+  return window.navigator.onLine;
+};

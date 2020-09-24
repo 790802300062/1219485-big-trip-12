@@ -1,3 +1,6 @@
+export const AUTHORIZATION = `Basic id790802300062bigtripkejgjkhelkjh`;
+export const END_POINT = `https://12.ecmascript.pages.academy/big-trip/`;
+
 export const EventCategory = {
   TRANSFER: `Transfer`,
   ACTIVITY: `Activity`
@@ -33,15 +36,18 @@ export const SortType = {
 };
 
 export const EventType = {
-  FILTER: `filter`,
-  EVENT: `event`,
-  INIT: `init`
+  FILTER: `Filter was changed`,
+  SORT: `Sort type was changed`,
+  EVENT: `Event data was changed`,
+  FAVORITE: `Property "Favorite" was changed`,
+  ADD: `New event was added`,
+  DELETE: `Event was deleted`,
+  INIT: `Application init`
 };
 
-export const UserAction = {
-  UPDATE_EVENT: `UPDATE_EVENT`,
-  ADD_EVENT: `ADD_EVENT`,
-  DELETE_EVENT: `DELETE_EVENT`
+export const UpdateType = {
+  PATCH: `PATCH`,
+  MAJOR: `MAJOR`
 };
 
 export const MenuItem = {
@@ -69,5 +75,8 @@ export const ChartType = {
   TIME_SPENT: `TIME SPENT`,
 };
 
-export const AUTHORIZATION = `Basic 123abc456def`;
-export const END_POINT = `https://12.ecmascript.pages.academy/big-trip/`;
+export const State = {
+  SAVING: `SAVING`,
+  DELETING: `DELETING`,
+  ABORTING: `ABORTING`
+};

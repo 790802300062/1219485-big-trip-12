@@ -1,12 +1,11 @@
-import {EventType} from '../const.js';
-import {makeFirstLetterUppercased} from '../utils/common.js';
-
 import Observer from '../utils/observer.js';
+import {makeFirstLetterUppercased} from '../utils/common.js';
 
 export default class EventsModel extends Observer {
   constructor(offersModel) {
     super();
     this._offersModel = offersModel;
+
     this._events = [];
     this._destinations = new Map();
   }
@@ -25,34 +24,34 @@ export default class EventsModel extends Observer {
     });
   }
 
-  setEvents(events) {
-    this._events = this._sortEvents(events.map(this._adaptToClient.bind(this)));
+  setEvents(eventType, updateType, events) {
+    this._events = this._sortEvents(events);
 
-    this._notify(EventType.INIT, events);
+    this._notify({eventType, updateType}, events);
   }
 
-  updateEvent(update) {
-    const index = this._events.findIndex((event) => event.id === update.id);
+  updateEvent(eventType, updateType, event) {
+    const index = this._events.findIndex((item) => event.id === item.id);
 
     if (index === -1) {
       throw new Error(`Can't update unexisting event`);
     }
 
-    this._events.splice(index, 1, update);
+    this._events.splice(index, 1, event);
     this._events = this._sortEvents(this._events);
 
-    this._notify(EventType.EVENT, update);
+    this._notify({eventType, updateType}, event);
   }
 
-  addEvent(update) {
-    this._events.push(update);
+  addEvent(eventType, updateType, event) {
+    this._events.push(event);
     this._events = this._sortEvents(this._events);
 
-    this._notify(EventType.EVENT, update);
+    this._notify({eventType, updateType}, event);
   }
 
-  deleteEvent(update) {
-    const index = this._events.findIndex((event) => event.id === update.id);
+  deleteEvent(eventType, updateType, event) {
+    const index = this._events.findIndex((item) => event.id === item.id);
 
     if (index === -1) {
       throw new Error(`Can't delete unexisting event`);
@@ -60,16 +59,19 @@ export default class EventsModel extends Observer {
 
     this._events.splice(index, 1);
 
-    this._notify(EventType.EVENT, update);
+    this._notify({eventType, updateType}, event);
   }
 
-  _adaptToClient(event) {
+  _sortEvents(events) {
+    return events.slice().sort((a, b) => a.timeStart - b.timeStart);
+  }
+
+  static adaptToClient(event) {
     return {
       id: event.id,
       type: makeFirstLetterUppercased(event.type),
       city: event.destination.name,
-      offers: this._offersModel.adaptOffersToClient(makeFirstLetterUppercased(event.type),
-          event.offers),
+      offers: event.offers,
       timeStart: new Date(event.date_from),
       timeEnd: new Date(event.date_to),
       price: event.base_price,
@@ -79,24 +81,20 @@ export default class EventsModel extends Observer {
     };
   }
 
-  adaptToServer(event) {
+  static adaptToServer(event) {
     return {
       'id': event.id,
       'type': event.type.toLowerCase(),
       'base_price': event.price,
       'date_from': event.timeStart.toISOString(),
       'date_to': event.timeEnd.toISOString(),
-      'is_favorite': event.isFavorite,
+      'is_favorite': Boolean(event.isFavorite),
       'destination': {
         'description': event.destination,
         'name': event.city,
         'pictures': event.photos
       },
-      'offers': this._offersModel.adaptOffersToServer(event.offers)
+      'offers': event.offers
     };
-  }
-
-  _sortEvents(events) {
-    return events.slice().sort((a, b) => a.timeStart - b.timeStart);
   }
 }

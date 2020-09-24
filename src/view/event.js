@@ -1,6 +1,6 @@
 import {
-  determineEventPreposition,
-  getEventDuration
+  generateEventPreposition,
+  getDuration
 } from '../utils/common.js';
 
 import {
@@ -8,13 +8,14 @@ import {
   getTimeInterval
 } from '../utils/time-and-date.js';
 
-import Abstract from '../view/abstract.js';
+import AbstractView from '../view/abstract';
 
-const MAX_OFFERS_AMOUNT = 3;
+const MAX_DISPLAY_OFFERS = 3;
 
-export default class EventView extends Abstract {
-  constructor(event) {
+export default class EventView extends AbstractView {
+  constructor(offersByType, event) {
     super();
+    this._offersByType = offersByType;
     this._event = event;
     this._editClickHandler = this._editClickHandler.bind(this);
   }
@@ -26,9 +27,10 @@ export default class EventView extends Abstract {
       `<li class="trip-events__item">
         <div class="event">
           <div class="event__type">
-            <img class="event__type-icon" width="42" height="42" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
+            <img class="event__type-icon" width="42" height="42"
+              src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
           </div>
-          <h3 class="event__title">${determineEventPreposition(type)} ${city}</h3>
+          <h3 class="event__title">${generateEventPreposition(type)} ${city}</h3>
 
           <div class="event__schedule">
             ${this._createTimeTemplate()}
@@ -51,6 +53,12 @@ export default class EventView extends Abstract {
     );
   }
 
+  setEditClickHandler(callback) {
+    this._callback.editClick = callback;
+    this.getElement().querySelector(`.event__rollup-btn`)
+      .addEventListener(`click`, this._editClickHandler);
+  }
+
   _createTimeTemplate() {
     const {timeStart, timeEnd} = this._event;
 
@@ -65,41 +73,25 @@ export default class EventView extends Abstract {
         </time>
       </p>
       <p class="event__duration">
-        ${getTimeInterval(getEventDuration(this._event))}
+        ${getTimeInterval(getDuration(this._event))}
       </p>`
     );
   }
 
   _createEventOffersTemplate() {
-    let eventOffers = [];
-    eventOffers = this._event.offers.map((offer) => {
-      return offer.checked
-        ? (
+    const displayOffersNumber = Math.min(this._event.offers.length, MAX_DISPLAY_OFFERS);
+
+    return displayOffersNumber
+      ? this._event.offers.slice(0, displayOffersNumber).map((offer) => {
+        return (
           `<li class="event__offer">
             <span class="event__offer-title">${offer.title}</span>
             &plus;&euro;&nbsp;
             <span class="event__offer-price">${offer.price}</span>
           </li>`
-        )
-        : ``;
-    });
-
-    let filteredOffers = eventOffers.filter((element) => {
-      return (element !== null) && (element !== ``);
-    });
-
-    if (filteredOffers.length > MAX_OFFERS_AMOUNT) {
-      return filteredOffers.slice(0, MAX_OFFERS_AMOUNT).join(``);
-    }
-
-    return filteredOffers.join(``);
-  }
-
-
-  setEditClickHandler(callback) {
-    this._callback.editClick = callback;
-    this.getElement().querySelector(`.event__rollup-btn`)
-      .addEventListener(`click`, this._editClickHandler);
+        );
+      }).join(``)
+      : ``;
   }
 
   _editClickHandler(evt) {

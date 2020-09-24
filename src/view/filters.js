@@ -1,13 +1,14 @@
 import {FilterType} from '../const.js';
 import {isInputTag} from '../utils/common.js';
 
-import Abstract from '../view/abstract.js';
+import AbstractView from '../view/abstract.js';
 
-export default class FilterView extends Abstract {
-  constructor(currentFilterType, filters) {
+export default class FiltersView extends AbstractView {
+  constructor(currentFilterType, filters, filtersEnabled) {
     super();
-    this._currentFilterType = currentFilterType;
+    this._currentFilter = currentFilterType;
     this._filters = filters;
+    this._filtersEnabled = filtersEnabled;
 
     this._filterTypeChangeHandler = this._filterTypeChangeHandler.bind(this);
   }
@@ -15,10 +16,10 @@ export default class FilterView extends Abstract {
   getTemplate() {
     const filterItemsTemplate = Object.values(FilterType)
       .map((filter) => {
-        return this._createFilterItemsTemplate(
+        return this._createFilterItemTemplate(
             filter,
-            filter === this._currentFilterType,
-            Boolean(this._filters[filter])
+            filter === this._currentFilter,
+            this._filtersEnabled && Boolean(this._filters[filter])
         );
       })
       .join(``);
@@ -31,20 +32,19 @@ export default class FilterView extends Abstract {
     );
   }
 
-  _createFilterItemsTemplate(filter, isChecked, isEnabled) {
-    return (
-      `<div class="trip-filters__filter">
-        <input id="filter-${filter}" class="trip-filters__filter-input visually-hidden"
-          type="radio" name="trip-filter"
-          value="${filter}" ${isChecked ? `checked` : ``} ${isEnabled ? `` : `disabled`}>
-        <label class="trip-filters__filter-label" for="filter-${filter}"> ${filter} </label>
-      </div>`
-    );
-  }
-
   setFilterTypeChangeHandler(callback) {
     this._callback.changeFilter = callback;
     this.getElement().addEventListener(`click`, this._filterTypeChangeHandler);
+  }
+
+  _createFilterItemTemplate(filter, isChecked, isEnabled) {
+    return (
+      `<div class="trip-filters__filter">
+        <input id="filter-${filter}" class="trip-filters__filter-input visually-hidden" type="radio"
+          name="trip-filter" value="${filter}" ${isChecked ? `checked` : ``} ${isEnabled ? `` : `disabled`}>
+        <label class="trip-filters__filter-label" for="filter-${filter}">${filter}</label>
+      </div>`
+    );
   }
 
   _filterTypeChangeHandler(evt) {

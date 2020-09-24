@@ -1,14 +1,14 @@
-import Abstract from '../view/abstract.js';
+import AbstractView from "./abstract.js";
 
-export default class EventsListView extends Abstract {
-  constructor(idNumber) {
+export default class EventsListView extends AbstractView {
+  constructor(index) {
     super();
-    this._idNumber = idNumber;
+    this._index = index;
   }
 
   getTemplate() {
     return (
-      `<ul class="trip-events__list" id="trip-events__list-${this._idNumber}"></ul>`
+      `<ul class="trip-events__list" id="trip-events__list-${this._index}"></ul>`
     );
   }
 }

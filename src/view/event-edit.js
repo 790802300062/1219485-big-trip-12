@@ -1,28 +1,33 @@
-import {EVENT_TYPES, UserAction, EventCategory} from '../const.js';
-import {formatDateAndTime} from '../utils/time-and-date.js';
 import {
-  determineEventPreposition,
+  EVENT_TYPES,
+  EventCategory,
+  EventType
+} from '../const.js';
+
+import {
+  generateEventPreposition,
   isInputTag,
-  makeFirstLetterUppercased
+  makeFirstLetterUppercased,
+  isOnline
 } from '../utils/common.js';
 
-import SmartView from '../view/smart.js';
+import {
+  formatDateAndTime,
+  getNewDate
+} from '../utils/time-and-date.js';
 
+import Smart from '../view/smart.js';
 import flatpickr from 'flatpickr';
 import moment from 'moment';
+import he from 'he';
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
-
-const HTML_CLASS = {
-  CITY: `event__field-group--destination`,
-  PRICE: `event__input--price`
-};
 
 const BLANK_EVENT = {
   type: EVENT_TYPES.get(EventCategory.TRANSFER)[0],
   city: ``,
   offers: [],
-  timeStart: new Date(),
-  timeEnd: new Date(),
+  timeStart: getNewDate(),
+  timeEnd: getNewDate(),
   price: 0,
   destination: [],
   photos: []
@@ -32,31 +37,36 @@ const FLATPICKR_PROPERTIES = {
   'dateFormat': `DD/MM/YY HH:mm`,
   'enableTime': true,
   'time_24hr': true,
-  'formatDate': (date, format) => moment(date).format(format)
+  'formatDate': (date, format) => {
+    return moment(date).format(format);
+  },
 };
 
-export default class EventEditView extends SmartView {
-  constructor(destinations, offers, event) {
-    super();
-    this._destinations = destinations;
-    this._offers = offers;
+const HTML_CLASS = {
+  CITY: `event__field-group--destination`,
+  PRICE: `event__input--price`
+};
 
-    if (!event) {
+export default class EventEditView extends Smart {
+  constructor(destinations, offersByType, event, originEvent) {
+    super();
+    this._destinations = destinations.size ? destinations : new Map();
+    this._offersByType = offersByType.size ? offersByType : new Map();
+
+    if (event) {
+      this._originData = originEvent ? originEvent : event;
+    } else {
       event = BLANK_EVENT;
-      if (this._offers.size > 0) {
-        event.offers = this._offers.get(event.type);
-      }
-      this._isEventNew = true;
+      this._isNew = true;
     }
 
-    this._data = Object.assign({}, event);
+    this._data = EventEditView.convertEventToData(event);
     this._startDatepicker = null;
     this._endDatepicker = null;
 
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._formCloseHandler = this._formCloseHandler.bind(this);
     this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
-
     this._eventTypeChangeHandler = this._eventTypeChangeHandler.bind(this);
     this._eventCityChangeHandler = this._eventCityChangeHandler.bind(this);
     this._offersChangeHandler = this._offersChangeHandler.bind(this);
@@ -67,104 +77,230 @@ export default class EventEditView extends SmartView {
 
     this._setInnerHandlers();
     this._setDatepickers();
-    this._checkEditFormValidity();
+    this._checkFormValidity();
   }
 
   getTemplate() {
-    const {type, timeStart, timeEnd, price} = this._data;
+    const {type, timeStart, timeEnd, price, isDisabled, isSaving, isDeleting} = this._data;
+
+    const buttonName = isDeleting ? `Deleting...` : `Delete`;
 
     return (
       `<form class="trip-events__item event event--edit" action="#" method="post">
-      <header class="event__header">
-        <div class="event__type-wrapper">
-          <label class="event__type event__type-btn" for="event-type-toggle-1">
-            <span class="visually-hidden">Choose event type</span>
-            <img class="event__type-icon" width="17" height="17"
-              src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
-          </label>
-          <input class="event__type-toggle visually-hidden" id="event-type-toggle-1" type="checkbox" >
-          <div class="event__type-list">${this._createTypesListTemplate()}</div>
-        </div>
+        <header class="event__header">
+          <div class="event__type-wrapper">
+            <label class="event__type event__type-btn" for="event-type-toggle-1">
+              <span class="visually-hidden">Choose event type</span>
+              <img class="event__type-icon" width="17" height="17"
+              src="img/icons/${type.toLowerCase()}.png" alt="Event type icon" >
+            </label>
+            <input class="event__type-toggle visually-hidden" id="event-type-toggle-1"
+            type="checkbox" ${isDisabled ? `disabled` : ``}>
+              <div class="event__type-list">
+              ${this._createTypesListTemplate()}
+            </div>
+          </div>
 
-        ${this._createTripCityTemplate()}
+          ${this._createTripCityTemplate()}
 
-        <div class="event__field-group event__field-group--time">
-          <label class="visually-hidden" for="event-start-time-1">From</label>
-          <input class="event__input event__input--time" id="event-start-time-1" type="text" name="event-start-time"
-            value="${formatDateAndTime(timeStart)}" readonly> &mdash;
-          <label class="visually-hidden" for="event-end-time-1">To</label>
-            <input class="event__input event__input--time" id="event-end-time-1" type="text" name="event-end-time"
-            value="${formatDateAndTime(timeEnd)}" readonly>
-        </div>
+          <div class="event__field-group event__field-group--time">
+            <label class="visually-hidden" for="event-start-time-1">From</label>
+            <input class="event__input event__input--time" id="event-start-time-1"
+              type="text" name="event-start-time" value="${formatDateAndTime(timeStart)}"
+              ${isDisabled ? `disabled` : ``} readonly>
+            &mdash;
+            <label class="visually-hidden" for="event-end-time-1">To</label>
+            <input class="event__input event__input--time" id="event-end-time-1"
+              type="text" name="event-end-time" value="${formatDateAndTime(timeEnd)}"
+              ${isDisabled ? `disabled` : ``} readonly>
+          </div>
 
-        <div class="event__field-group event__field-group--price">
-          <label class="event__label" for="event-price-1">
-            <span class="visually-hidden">Price</span> &euro;
-          </label>
-          <input class="event__input ${HTML_CLASS.PRICE}" id="event-price-1" type="number" name="event-price"
-            value="${price}">
-        </div>
+          <div class="event__field-group event__field-group--price">
+            <label class="event__label" for="event-price-1">
+              <span class="visually-hidden">Price</span>
+              &euro;
+            </label>
+            <input class="event__input ${HTML_CLASS.PRICE}" id="event-price-1"
+            type="number" name="event-price" value="${price}" ${isDisabled ? `disabled` : ``}>
+          </div>
 
-        <button class="event__save-btn btn btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">
-          ${this._isEventNew ? `Cancel` : `Delete`}
-        </button>
+          <button class="event__save-btn btn btn--blue" type="submit" ${isDisabled ? `disabled` : ``}>
+            ${isSaving ? `Saving...` : `Save`}
+          </button>
+          <button class="event__reset-btn" type="reset" ${isDisabled ? `disabled` : ``}>
+            ${this._isNew ? `Cancel` : buttonName}
+          </button>
 
-        ${this._createTripFavoriteButtonTemplate()}
-      </header>
+          ${this._createTripFavoriteButtonTemplate()}
+        </header>
 
-      ${this._createTripDetailsTemplate()}
+        ${this._createTripDetailsTemplate()}
 
-    </form>`
+      </form>`
     );
   }
 
-  _createTripFavoriteButtonTemplate() {
-    const {isFavorite} = this._data;
+  removeElement() {
+    super.removeElement();
+    this._destroyDateDatepickers();
+  }
 
-    return !this._isEventNew
+  restoreHandlers() {
+    this._setInnerHandlers();
+    this._setDatepickers();
+    this.setFormSubmitHandler(this._callback.changeEventData);
+    this.setDeleteClickHandler(this._callback.eventDelete);
+
+    if (!this._isNew) {
+      this.setFormCloseHandler(this._callback.formClose);
+    }
+  }
+
+  setFormCloseHandler(callback) {
+    this._callback.formClose = callback;
+    this.getElement().querySelector(`.event__rollup-btn`)
+      .addEventListener(`click`, this._formCloseHandler);
+  }
+
+  setFormSubmitHandler(callback) {
+    this._callback.changeEventData = callback;
+    this.getElement().addEventListener(`submit`, this._formSubmitHandler);
+  }
+
+  setDeleteClickHandler(callback) {
+    this._callback.eventDelete = callback;
+    this.getElement().querySelector(`.event__reset-btn`)
+      .addEventListener(`click`, this._deleteButtonClickHandler);
+  }
+
+  reset(event) {
+    this.updateData(
+        EventEditView.convertEventToData(event)
+    );
+  }
+
+  getUnsavedUserData() {
+    return this._data;
+  }
+
+  _destroyDateDatepickers() {
+    if (this._startDatepicker) {
+      this._startDatepicker.destroy();
+      this._startDatepicker = null;
+    }
+
+    if (this._endDatepicker) {
+      this._endDatepicker.destroy();
+      this._endDatepicker = null;
+    }
+  }
+
+  _setDatepickers() {
+    this._destroyDateDatepickers();
+
+    this._startDatepicker = flatpickr(
+        this.getElement().querySelector(`#event-start-time-1`),
+        Object.assign(
+            {
+              defaultDate: this._data.timeStart,
+              onChange: this._startDateChangeHandler
+            },
+            FLATPICKR_PROPERTIES
+        )
+    );
+
+    this._endDatepicker = flatpickr(
+        this.getElement().querySelector(`#event-end-time-1`),
+        Object.assign(
+            {
+              defaultDate: this._data.timeEnd,
+              minDate: this._data.timeStart,
+              onChange: this._endDateChangeHandler
+            },
+            FLATPICKR_PROPERTIES
+        )
+    );
+  }
+
+  _setInnerHandlers() {
+    this.getElement().querySelector(`.event__type-list`)
+      .addEventListener(`click`, this._eventTypeChangeHandler);
+    this.getElement().querySelector(`.${HTML_CLASS.CITY}`)
+      .addEventListener(`change`, this._eventCityChangeHandler);
+    this.getElement().querySelector(`.${HTML_CLASS.PRICE}`)
+      .addEventListener(`change`, this._eventPriceChangeHandler);
+
+    if (this._offersByType.get(this._data.type)
+      && this._offersByType.get(this._data.type).length) {
+      this.getElement().querySelector(`.event__available-offers`)
+        .addEventListener(`click`, this._offersChangeHandler);
+    }
+
+    if (!this._isNew) {
+      this.getElement().querySelector(`.event__favorite-btn`)
+        .addEventListener(`click`, this._favoriteClickHandler);
+    }
+  }
+
+  _createTripFavoriteButtonTemplate() {
+    const {isFavorite, isDisabled} = this._data;
+
+    return !this._isNew
       ? (
-        `<input id="event-favorite-1" class="event__favorite-checkbox visually-hidden"
-          type="checkbox" name="event-favorite" ${isFavorite ? `checked` : ``}>
+        `<input id="event-favorite-1" class="event__favorite-checkbox visually-hidden" type="checkbox"
+          name="event-favorite" ${isFavorite ? `checked` : ``} ${isDisabled ? `disabled` : ``}>
         <label class="event__favorite-btn" for="event-favorite-1">
           <span class="visually-hidden">Add to favorite</span>
           <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
-            <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
+            <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855
+             8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
           </svg>
         </label>
 
-        <button class="event__rollup-btn" type="button">
+        <button class="event__rollup-btn" type="button" ${isDisabled ? `disabled` : ``}>
           <span class="visually-hidden">Open event</span>
-        </button>`)
+        </button>`
+      )
       : ``;
   }
 
-  _createTripOffersTemplate() {
-    const {offers} = this._data;
+  _createInnerPartOfOffersSection(offersList) {
+    const {offers, isDisabled} = this._data;
 
-    return offers.length
-      ? (
-        `<section class="event__section event__section--offers">
+    const checkedOffers = offers.reduce((result, offer) => {
+      return result.set(offer.title, offer);
+    }, new Map());
+
+    return offersList
+      .map((offer) => {
+        return (
+          `<div class="event__offer-selector">
+            <input class="event__offer-checkbox visually-hidden" id="event-offer-${offer.title}-1"
+              type="checkbox" name="${offer.title}" ${checkedOffers.has(offer.title) ? `checked` : ``}
+              ${isDisabled ? `disabled` : ``}>
+            <label class="event__offer-label" for="event-offer-${offer.title}-1">
+              <span class="event__offer-title">${offer.title}</span>
+              &plus;&euro;&nbsp;
+              <span class="event__offer-price">${offer.price}</span>
+            </label>
+          </div>`
+        );
+      })
+      .join(``);
+  }
+
+  _createTripOffersSectionTemplate() {
+    const {type} = this._data;
+
+    const offersList = this._offersByType.get(type);
+
+    return (offersList && offersList.length)
+      ? `<section class="event__section event__section--offers">
           <h3 class="event__section-title event__section-title--offers">Offers</h3>
           <div class="event__available-offers">
-          ${offers.map((offer) => {
-          return (
-            `<div class="event__offer-selector">
-              <input class="event__offer-checkbox visually-hidden"
-              id="event-offer-${offer.title}-1" type="checkbox" name="${offer.title}"
-              ${offer.checked ? `checked` : ``}>
-
-              <label class="event__offer-label" for="event-offer-${offer.title}-1">
-                <span class="event__offer-title">${offer.title}</span>
-                &plus;&euro;&nbsp;
-                <span class="event__offer-price">${offer.price}</span>
-              </label>
-            </div>`
-          );
-        }).join(``)}
+            ${this._createInnerPartOfOffersSection(offersList)}
           </div>
         </section>`
-      )
       : ``;
   }
 
@@ -176,7 +312,9 @@ export default class EventEditView extends SmartView {
         `<section class="event__section event__section--destination">
           <h3 class="event__section-title event__section-title--destination">Destination</h3>
           <p class="event__destination-description">${destination}</p>
+
           ${this._createTripDestinationPhotosTemplate()}
+
         </section>`
       )
       : ``;
@@ -189,11 +327,9 @@ export default class EventEditView extends SmartView {
       ? (
         `<div class="event__photos-container">
           <div class="event__photos-tape">
-            ${photos.map((photo) => `
-              <img class="event__photo"
-                src="${photo.src}"
-                alt="${photo.description}">`)
-                .join(``)}
+            ${photos.map((photo, index) => `<img class="event__photo"
+              src="${isOnline() ? photo.src : `./img/photos/${Math.min(index + 1, 5)}.jpg`}"
+              alt="${photo.description}">`).join(``)}
           </div>
         </div>`
       )
@@ -201,12 +337,15 @@ export default class EventEditView extends SmartView {
   }
 
   _createTripDetailsTemplate() {
-    const {offers, destination, photos} = this._data;
-    return ((destination && destination.length)
-     || (photos && photos.length)
-     || (offers && offers.length))
+    const {destination, photos} = this._data;
+
+    const offersExisting = (this._offersByType.get(this._data.type)
+      && this._offersByType.get(this._data.type).length);
+
+    return ((destination && destination.length) || (photos && photos.length)
+     || offersExisting)
       ? (`<section class="event__details">
-          ${this._createTripOffersTemplate()}
+          ${this._createTripOffersSectionTemplate()}
           ${this._createTripDestinationDescriptionTemplate()}
         </section>`
       )
@@ -214,20 +353,20 @@ export default class EventEditView extends SmartView {
   }
 
   _createTripCityTemplate() {
-    const {type, city} = this._data;
+    const {type, city, isDisabled} = this._data;
 
     return (
       `<div class="event__field-group ${HTML_CLASS.CITY}">
         <label class="event__label event__type-output" for="event-destination-1">
-          ${determineEventPreposition(type)}
+          ${generateEventPreposition(type)}
         </label>
         <input class="event__input event__input--destination" id="event-destination-1"
-          type="text" name="event-destination"
-          value="${city}" list="destination-list-1" >
+          type="text" name="event-destination" value="${he.encode(city)}" list="destination-list-1"
+          ${isDisabled ? `disabled` : ``}>
         <datalist id="destination-list-1">
           ${Array.from(this._destinations.keys())
-            .map((option) => {
-              return `<option value="${option}"></option>`;
+            .map((it) => {
+              return `<option value="${it}"></option>`;
             })
             .join(``)}
         </datalist>
@@ -263,132 +402,51 @@ export default class EventEditView extends SmartView {
       }).join(``);
   }
 
-  setFormCloseHandler(callback) {
-    this._callback.formClose = callback;
-    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._formCloseHandler);
-  }
-
-  setFormSubmitHandler(callback) {
-    this._callback.formSubmit = callback;
-    this.getElement().addEventListener(`submit`, this._formSubmitHandler);
-  }
-
-  setDeleteClickHandler(callback) {
-    this._callback.eventDelete = callback;
-    this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._deleteButtonClickHandler);
-  }
-
-  restoreHandlers() {
-    this._setInnerHandlers();
-    this._setDatepickers();
-    this.setFormSubmitHandler(this._callback.formSubmit);
-    this.setDeleteClickHandler(this._callback.eventDelete);
-
-    if (!this._isEventNew) {
-      this.setFormCloseHandler(this._callback.formClose);
-    }
-  }
-
-  reset(event) {
-    this.updateDate(event);
-  }
-
-  _setDatepickers() {
-    if (this._startDatepicker) {
-      this._startDatepicker.destroy();
-      this._startDatepicker = null;
-    }
-
-    if (this._endDatepicker) {
-      this._endDatepicker.destroy();
-      this._endDatepicker = null;
-    }
-
-    this._startDatepicker = flatpickr(
-        this.getElement().querySelector(`#event-start-time-1`),
-        Object.assign(
-            {
-              defaultDate: this._data.timeStart,
-              onChange: this._startDateChangeHandler
-            },
-            FLATPICKR_PROPERTIES
-        )
-    );
-
-    this._endDatepicker = flatpickr(
-        this.getElement().querySelector(`#event-end-time-1`),
-        Object.assign(
-            {
-              defaultDate: this._data.timeEnd,
-              minDate: this._data.timeStart,
-              onChange: this._endDateChangeHandler
-            },
-            FLATPICKR_PROPERTIES
-        )
-    );
-  }
-
-  _setInnerHandlers() {
-    this.getElement().querySelector(`.event__type-list`)
-      .addEventListener(`click`, this._eventTypeChangeHandler);
-    this.getElement().querySelector(`.${HTML_CLASS.CITY}`)
-      .addEventListener(`change`, this._eventCityChangeHandler);
-    this.getElement().querySelector(`.${HTML_CLASS.PRICE}`)
-      .addEventListener(`change`, this._eventPriceChangeHandler);
-
-    if (this._data.offers && this._data.offers.length) {
-      this.getElement().querySelector(`.event__available-offers`)
-        .addEventListener(`click`, this._offersChangeHandler);
-    }
-
-    if (!this._isEventNew) {
-      this.getElement().querySelector(`.event__favorite-btn`)
-        .addEventListener(`click`, this._favoriteClickHandler);
-    }
-  }
-
   _checkCityValidity() {
-    const cityNode = this.getElement().querySelector(`.${HTML_CLASS.CITY} input`);
-    let errorMessage = ``;
+    const cityField = this.getElement().querySelector(`.${HTML_CLASS.CITY} input`);
+    let cityMessage = ``;
     let validity = true;
 
-    if (cityNode.value.length === 0) {
-      errorMessage = `Не указан пункт назначения`;
+    if (cityField.value.length === 0) {
+      cityMessage = `Не указан пункт назначения`;
       validity = false;
     } else if (this._destinations.size
-      && ![...this._destinations.keys()].includes(cityNode.value)) {
-      errorMessage = `Выбранный пункт назначения отсутсвует в предложенном списке`;
+      && ![...this._destinations.keys()].includes(cityField.value)) {
+      cityMessage = `Выбранный пункт назначения отсутсвует в предложенном списке`;
       validity = false;
     }
 
-    cityNode.setCustomValidity(errorMessage);
+    cityField.setCustomValidity(cityMessage);
 
     return validity;
   }
 
   _checkPriceValidity() {
-    const priceNode = this.getElement().querySelector(`.${HTML_CLASS.PRICE}`);
-    let errorMessage = ``;
+    const priceField = this.getElement().querySelector(`.${HTML_CLASS.PRICE}`);
+    let priceMessage = ``;
     let validity = true;
 
-    if (!(parseInt(priceNode.value, 10) > 0)) {
-      errorMessage = `Стоимость должна быть больше 0`;
+    if (!(parseInt(priceField.value, 10))) {
+      priceMessage = `Стоимость должны быть больше ноля`;
       validity = false;
     }
 
-    priceNode.setCustomValidity(errorMessage);
+    priceField.setCustomValidity(priceMessage);
 
     return validity;
   }
 
-  _checkEditFormValidity() {
+  _checkFormValidity() {
     return this._checkCityValidity() && this._checkPriceValidity();
   }
 
   _formSubmitHandler(evt) {
     evt.preventDefault();
-    if (this._checkEditFormValidity()) {
-      this._callback.formSubmit(this._data);
+    if (this._checkFormValidity()) {
+      this._callback.changeEventData(
+          EventEditView.convertDataToEvent(this._data),
+          EventType.EVENT
+      );
     }
   }
 
@@ -398,11 +456,17 @@ export default class EventEditView extends SmartView {
   }
 
   _favoriteClickHandler() {
-    this.updateDate(
-        {
-          isFavorite: !this._data.isFavorite
-        },
-        true
+    this._callback.changeEventData(
+        EventEditView.convertDataToEvent(
+            Object.assign(
+                {},
+                this._originData,
+                {
+                  isFavorite: !this._originData.isFavorite
+                }
+            )
+        ),
+        EventType.FAVORITE
     );
   }
 
@@ -412,10 +476,9 @@ export default class EventEditView extends SmartView {
     }
 
     const type = makeFirstLetterUppercased(evt.target.value);
-    this.getElement().querySelector(`.event__type-toggle`).checked = false;
 
-    const offers = this._offers.get(type);
-    this.updateDate({type, offers});
+    this.getElement().querySelector(`.event__type-toggle`).checked = false;
+    this.updateData({type, offers: []});
   }
 
   _eventCityChangeHandler(evt) {
@@ -428,7 +491,7 @@ export default class EventEditView extends SmartView {
 
     if (destination) {
       const {description, photos} = destination;
-      this.updateDate(
+      this.updateData(
           {
             city: newCity,
             destination: description,
@@ -436,14 +499,14 @@ export default class EventEditView extends SmartView {
           }
       );
     } else {
-      this.updateDate(
+      this.updateData(
           {
             city: newCity,
           }
       );
     }
 
-    this._checkEditFormValidity();
+    this._checkFormValidity();
   }
 
   _offersChangeHandler(evt) {
@@ -452,10 +515,19 @@ export default class EventEditView extends SmartView {
     }
 
     const offers = this._data.offers.map((offer) => Object.assign({}, offer));
-    const offer = offers.find((it) => it.title === evt.target.name);
-    offer.checked = !offer.checked;
+    const offerIndex = offers.findIndex((it) => it.title === evt.target.name);
 
-    this.updateDate({offers}, true);
+    if (offerIndex < 0) {
+      const offersList = this._offersByType.get(this._data.type);
+      const newOffer = offersList.find((it) => it.title === evt.target.name);
+      if (newOffer) {
+        offers.push(newOffer);
+      }
+    } else {
+      offers.splice(offerIndex, 1);
+    }
+
+    this.updateData({offers}, true);
   }
 
   _eventPriceChangeHandler(evt) {
@@ -463,27 +535,27 @@ export default class EventEditView extends SmartView {
       return;
     }
 
-    this.updateDate(
+    this.updateData(
         {
           price: parseInt(evt.target.value, 10),
         },
         true
     );
 
-    this._checkEditFormValidity();
+    this._checkFormValidity();
   }
 
   _startDateChangeHandler([userDate]) {
     const timeStart = new Date(userDate);
-    const timeEnd = (timeStart > this._data.timeEnd) ? timeStart : this._data.timeStart;
+    const timeEnd = (timeStart > this._data.timeEnd) ? timeStart : this._data.timeEnd;
 
     this._endDatepicker.set(`minDate`, timeStart);
     this._endDatepicker.setDate(timeEnd);
-    this.updateDate({timeStart, timeEnd}, true);
+    this.updateData({timeStart, timeEnd}, true);
   }
 
   _endDateChangeHandler([userDate]) {
-    this.updateDate(
+    this.updateData(
         {
           timeEnd: new Date(userDate)
         },
@@ -493,6 +565,22 @@ export default class EventEditView extends SmartView {
 
   _deleteButtonClickHandler(evt) {
     evt.preventDefault();
-    this._callback.eventDelete(UserAction.DELETE_EVENT, this._data);
+    this._callback.eventDelete(EventEditView.convertDataToEvent(this._data));
+  }
+
+  static convertEventToData(event) {
+    return Object.assign(event, {
+      isDisabled: false,
+      isSaving: false,
+      isDeleting: false
+    });
+  }
+
+  static convertDataToEvent(eventData) {
+    delete eventData.isDisabled;
+    delete eventData.isSaving;
+    delete eventData.isDeleting;
+
+    return eventData;
   }
 }

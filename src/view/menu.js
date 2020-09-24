@@ -1,11 +1,11 @@
 import {isLinkTag} from '../utils/common.js';
 import {MenuItem} from '../const.js';
 
-import Abstract from '../view/abstract.js';
+import AbstractView from '../view/abstract.js';
 
 const ACTIVE_CLASS = `trip-tabs__btn--active`;
 
-export default class MenuView extends Abstract {
+export default class MenuView extends AbstractView {
   constructor() {
     super();
     this._menuItemClickHandler = this._menuItemClickHandler.bind(this);
@@ -21,12 +21,12 @@ export default class MenuView extends Abstract {
   }
 
   setMenuItem(menuItem) {
-    const itemNode = this.getElement().querySelector(`[value=${menuItem}]`);
-    const prevActiveNode = this.getElement().querySelector(`.${ACTIVE_CLASS}`);
+    const item = this.getElement().querySelector(`[value=${menuItem}]`);
+    const prevActiveItem = this.getElement().querySelector(`.${ACTIVE_CLASS}`);
 
-    if (itemNode && prevActiveNode && prevActiveNode !== itemNode) {
-      prevActiveNode.classList.remove(ACTIVE_CLASS);
-      itemNode.classList.add(ACTIVE_CLASS);
+    if (item && prevActiveItem && prevActiveItem !== item) {
+      prevActiveItem.classList.remove(ACTIVE_CLASS);
+      item.classList.add(ACTIVE_CLASS);
     }
   }
 
@@ -38,7 +38,8 @@ export default class MenuView extends Abstract {
   _menuItemClickHandler(evt) {
     evt.preventDefault();
 
-    if (!isLinkTag(evt) || evt.target.classList.contains(ACTIVE_CLASS)) {
+    if (!isLinkTag(evt)
+      || evt.target.classList.contains(ACTIVE_CLASS)) {
       return;
     }
 

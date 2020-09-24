@@ -1,34 +1,40 @@
-import {EventType} from '../const.js';
 import {
-  render,
-  append,
-  replace,
-  RenderPosition
+  EventType,
+  UpdateType
+} from '../const.js';
+
+import {
+ render,
+ append,
+ replace,
+ RenderPosition
 } from '../utils/render.js';
 
 import TripInfoView from '../view/trip-info.js';
 import TripCostView from '../view/trip-cost.js';
 import TripRouteView from '../view/trip-route.js';
-import EventsPresenter from './events.js';
+import EventsPresenter from '../presenter/events.js';
+
+
 
 export default class TripInfoPresenter extends EventsPresenter {
-  constructor(tripInfoContainer, eventsModel, filtersModel) {
-    super(eventsModel, filtersModel);
+  constructor(tripInfoContainer, eventsModel, filterModel) {
+    super(eventsModel, filterModel);
     this._container = tripInfoContainer;
 
-    this._updateViews = this._updateViews.bind(this);
+    this._updateView = this._updateView.bind(this);
 
-    this._eventsModel.addObserver(this._updateViews);
-    this._filtersModel.addObserver(this._updateViews);
+    this._eventsModel.addObserver(this._updateView);
+    this._filterModel.addObserver(this._updateView);
   }
 
   init() {
     this._tripInfoComponent = new TripInfoView();
-    this._routeComponent = new TripRouteView(this._getAllEvents());
-    this._costComponent = new TripCostView(this._getEvents());
+    this._tripRouteComponent = new TripRouteView(this._getAllEvents());
+    this._tripCostComponent = new TripCostView(this._getEvents());
 
-    append(this._tripInfoComponent, this._routeComponent);
-    append(this._tripInfoComponent, this._costComponent);
+    append(this._tripInfoComponent, this._tripRouteComponent);
+    append(this._tripInfoComponent, this._tripCostComponent);
 
     render(
         this._container,
@@ -37,32 +43,36 @@ export default class TripInfoPresenter extends EventsPresenter {
     );
   }
 
-  _updateViews(eventType) {
-    if (eventType === EventType.EVENT) {
-      this._updateRoute();
+  _updateView(event) {
+    if (event.updateType !== UpdateType.MAJOR) {
+      return;
     }
 
-    this._updateCost();
-    this._updateRoute();
+    if (event.eventType === EventType.EVENT) {
+      this._updateTripRoute();
+    }
+
+    this._updateTripCost();
+    this._updateTripRoute();
   }
 
-  _updateCost() {
-    let prevCostComponent = this._costComponent;
+  _updateTripCost() {
+    let prevTripCostComponent = this._tripCostComponent;
 
-    this._costComponent = new TripCostView(this._getEvents());
+    this._tripCostComponent = new TripCostView(this._getEvents());
 
-    replace(this._costComponent, prevCostComponent);
+    replace(this._tripCostComponent, prevTripCostComponent);
 
-    prevCostComponent = null;
+    prevTripCostComponent = null;
   }
 
-  _updateRoute() {
-    let prevRouteComponent = this._routeComponent;
+  _updateTripRoute() {
+    let prevTripRouteComponent = this._tripRouteComponent;
 
-    this._routeComponent = new TripRouteView(this._getAllEvents());
+    this._tripRouteComponent = new TripRouteView(this._getAllEvents());
 
-    replace(this._routeComponent, prevRouteComponent);
+    replace(this._tripRouteComponent, prevTripRouteComponent);
 
-    prevRouteComponent = null;
+    prevTripRouteComponent = null;
   }
 }

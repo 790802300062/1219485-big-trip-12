@@ -1,12 +1,16 @@
 import {isEscEvent} from '../utils/common.js';
-import {UserAction} from '../const.js';
+import {
+  EventType,
+  State
+} from '../const.js';
+
 import {
   replace,
   append,
   remove
 } from '../utils/render.js';
 
-import EventView from '../view/event';
+import EventView from '../view/event.js';
 import EventEditView from '../view/event-edit.js';
 
 const Mode = {
@@ -15,18 +19,14 @@ const Mode = {
 };
 
 export default class EventPresenter {
-  constructor(
-      container,
-      eventsModel,
-      offersModel,
-      eventDataChangeHandler,
-      resetEventDataChangesHandler
-  ) {
+  constructor(container, eventsModel, offersModel, eventDataChangeHandler,
+      resetEventDataChangesHandler, event) {
     this._contaier = container;
     this._eventsModel = eventsModel;
     this._offersModel = offersModel;
     this._changeEventData = eventDataChangeHandler;
     this._resetEventDataChanges = resetEventDataChangesHandler;
+    this._event = event;
 
     this._eventComponent = null;
     this._eventEditComponent = null;
@@ -40,17 +40,12 @@ export default class EventPresenter {
   }
 
   init(event) {
-    this._event = event;
-
     const prevEventComponent = this._eventComponent;
     const prevEventEditComponent = this._eventEditComponent;
 
-    this._eventComponent = new EventView(event);
-    this._eventEditComponent = new EventEditView(
-        this._eventsModel.getDestinations(),
-        this._offersModel.getOffers(),
-        event
-    );
+    this._eventComponent = new EventView(this._offersModel.getOffers(), this._event);
+    this._eventEditComponent = new EventEditView(this._eventsModel.getDestinations(),
+        this._offersModel.getOffers(), event, this._event);
 
     this._eventComponent.setEditClickHandler(this._editClickHandler);
     this._eventEditComponent.setFormSubmitHandler(this._formSubmitHandler);
@@ -86,6 +81,45 @@ export default class EventPresenter {
     }
   }
 
+  setViewState(state) {
+    const resetFormState = () => {
+      this._eventEditComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    switch (state) {
+      case State.SAVING:
+        this._eventEditComponent.updateData({
+          isDisabled: true,
+          isSaving: true
+        });
+        break;
+      case State.DELETING:
+        this._eventEditComponent.updateData({
+          isDisabled: true,
+          isDeleting: true
+        });
+        break;
+      case State.ABORTING:
+        this._eventComponent.shake(resetFormState);
+        this._eventEditComponent.shake(resetFormState);
+        break;
+      default:
+        throw new Error('Impossible to determine State');
+    }
+  }
+
+  setPropertyFavorite(updatedServerDataEvent) {
+    this._event = updatedServerDataEvent;
+
+    const eventData = this._eventEditComponent.getUnsavedUserData();
+    eventData.isFavorite = !eventData.isFavorite;
+    this.init(eventData);
+  }
+
   _replaceEventToForm() {
     replace(this._eventEditComponent, this._eventComponent);
     this._mode = Mode.EDITING;
@@ -110,16 +144,15 @@ export default class EventPresenter {
     this._replaceEventToForm();
   }
 
-  _formSubmitHandler(newEventData) {
-    this._changeEventData(UserAction.UPDATE_EVENT, newEventData);
-    this._replaceFormToEvent();
+  _formSubmitHandler(newEventData, eventType) {
+    this._changeEventData(eventType, newEventData);
   }
 
   _formCloseHandler() {
     this.resetView();
   }
 
-  _deleteClickHandler(userAction, event) {
-    this._changeEventData(userAction, event);
+  _deleteClickHandler(event) {
+    this._changeEventData(EventType.DELETE, event);
   }
 }

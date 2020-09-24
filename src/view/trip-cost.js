@@ -1,6 +1,6 @@
-import Abstract from '../view/abstract.js';
+import AbstractView from '../view/abstract.js';
 
-export default class TripCostView extends Abstract {
+export default class TripCostView extends AbstractView {
   constructor(events) {
     super();
     this._totalTripCost = this._getTotalTripCost(events);
@@ -25,9 +25,7 @@ export default class TripCostView extends Abstract {
 
       if (event.offers) {
         for (const offer of event.offers) {
-          if (offer.checked) {
-            totalTripCost += offer.price;
-          }
+          totalTripCost += offer.price;
         }
       }
     }

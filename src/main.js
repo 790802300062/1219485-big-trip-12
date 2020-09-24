@@ -1,81 +1,52 @@
 import {
   render,
   RenderPosition
-} from './utils/render.js';
+}from './utils/render.js';
 
 import {
-  AUTHORIZATION,
-  END_POINT,
   FilterType,
-  MenuItem
+  MenuItem,
+  EventType,
+  UpdateType,
+  AUTHORIZATION,
+  END_POINT
 } from './const.js';
 
 import MenuView from './view/menu.js';
+
 import TripPresenter from './presenter/trip.js';
-import FiltersPreseter from './presenter/filters.js';
+import FiltersPresenter from './presenter/filters.js';
 import TripInfoPresenter from './presenter/trip-info.js';
 import StatisticsPresenter from './presenter/statistics.js';
+
 import OffersModel from './model/offers.js';
 import EventsModel from './model/events.js';
-import FiltersModel from './model/filters.js';
-import Api from './api.js';
+import FilterModel from './model/filter.js';
 
-const tripInfoPosition = document.querySelector(`.trip-main`);
-const menuPosition = tripInfoPosition.querySelector(`.menu-position`);
-const filtersPosition = tripInfoPosition.querySelector(`.filters-position`);
-const eventsContainerPosition = document.querySelector(`.trip-events`);
-const sortAndContentPosition = eventsContainerPosition.querySelector(`.sort-content-position`);
-const newEventButtonPosition = tripInfoPosition.querySelector(`.trip-main__event-add-btn`);
+import Api from './api/api.js';
+import Store from './api/store.js';
+import Provider from './api/provider.js';
 
-const api = new Api(END_POINT, AUTHORIZATION);
-const offersModel = new OffersModel();
-const eventsModel = new EventsModel(offersModel);
-const filtersModel = new FiltersModel();
-const menuComponent = new MenuView();
-const filtersPreseter = new FiltersPreseter(filtersPosition, eventsModel, filtersModel);
-const tripPresenter = new TripPresenter(eventsContainerPosition, sortAndContentPosition,
-    eventsModel, offersModel, filtersModel, api);
-const informationPresenter = new TripInfoPresenter(tripInfoPosition, eventsModel, filtersModel);
-const statisticsPresenter = new StatisticsPresenter(eventsContainerPosition, eventsModel);
+const STORE_PREFIX = `bigtrip-localstorage`;
+const STORE_VER = `v12.0`;
+const STORE_NAME = `${STORE_PREFIX}-${STORE_VER}`;
+const OFFLINE_TITLE = ` [offline]`;
 
-newEventButtonPosition.disabled = true;
-
-informationPresenter.init();
-tripPresenter.init();
-filtersPreseter.init();
-
-Promise.all([
-  api.getOffers(),
-  api.getDestinations(),
-  api.getEvents(),
-])
-  .then(([offers, destinations, events]) => {
-    offersModel.setOffersFromServer(offers);
-    eventsModel.setDestinations(destinations);
-    eventsModel.setEvents(events);
-    enableMenu();
-  })
-  .catch(() => {
-    eventsModel.setEvents([]);
-    enableMenu();
-  });
-
-const enableMenu = () => {
-  render(menuPosition, menuComponent, RenderPosition.AFTEREND);
-
-  menuComponent.setMenuItemClickHandler(handleMenuClick);
-  newEventButtonPosition.addEventListener(`click`, newEventButtonClickHandler);
-  newEventButtonPosition.disabled = false;
-};
+const tripInfoNode = document.querySelector(`.trip-main`);
+const menuNode = tripInfoNode.querySelector(`.menu-position`);
+const filtersNode = tripInfoNode.querySelector(`.filters-position`);
+const eventsContainerNode = document.querySelector(`.trip-events`);
+const sortAndContentNode = eventsContainerNode.querySelector(`.sort-content-position`);
+const newEventButtonNode = tripInfoNode.querySelector(`.trip-main__event-add-btn`);
 
 const newEventButtonClickHandler = (evt) => {
   evt.preventDefault();
   handleMenuClick(MenuItem.NEW_EVENT);
-  menuComponent.setMenuItem(MenuItem.TABLE);
+  siteMenuComponent.setMenuItem(MenuItem.TABLE);
 };
 
 const newEventFormCloseHandler = () => {
-  newEventButtonPosition.disabled = false;
+  newEventButtonNode.disabled = false;
 };
 
 const handleMenuClick = (menuItem) => {
@@ -83,17 +54,80 @@ const handleMenuClick = (menuItem) => {
     case MenuItem.NEW_EVENT:
       statisticsPresenter.destroy();
       tripPresenter.destroy();
-      filtersModel.setFilter(FilterType.EVERYTHING);
+      filterModel.setFilter(FilterType.EVERYTHING);
       tripPresenter.init();
+      filtersPresenter.init();
       tripPresenter.createEvent(newEventFormCloseHandler);
-      newEventButtonPosition.disabled = true;
+      newEventButtonNode.disabled = true;
       break;
     case MenuItem.TABLE:
       statisticsPresenter.destroy();
       tripPresenter.init();
+      filtersPresenter.init();
       break;
     case MenuItem.STATS:
       tripPresenter.destroy();
+      filterModel.setFilter(FilterType.EVERYTHING);
+      filtersPresenter.init(false);
       statisticsPresenter.init();
   }
 };
+
+const enableMenu = () => {
+  render(menuNode, siteMenuComponent, RenderPosition.AFTEREND);
+
+  siteMenuComponent.setMenuItemClickHandler(handleMenuClick);
+  newEventButtonNode.addEventListener(`click`, newEventButtonClickHandler);
+  newEventButtonNode.disabled = false;
+};
+
+const api = new Api(END_POINT, AUTHORIZATION);
+const store = new Store(STORE_NAME, window.localStorage);
+const apiWithProvider = new Provider(api, store);
+
+const offersModel = new OffersModel();
+const eventsModel = new EventsModel();
+const filterModel = new FilterModel();
+const siteMenuComponent = new MenuView();
+
+const filtersPresenter = new FiltersPresenter(filtersNode, eventsModel, filterModel);
+const tripPresenter = new TripPresenter(eventsContainerNode, sortAndContentNode,
+  eventsModel, offersModel, filterModel, apiWithProvider);
+
+const tripInfoPresenter = new TripInfoPresenter(tripInfoNode, eventsModel, filterModel);
+const statisticsPresenter = new StatisticsPresenter(eventsContainerNode, eventsModel);
+
+newEventButtonNode.disabled = true;
+
+tripInfoPresenter.init();
+tripPresenter.init();
+filtersPresenter.init();
+
+Promise.all([
+  apiWithProvider.getOffers(),
+  apiWithProvider.getDestinations(),
+  apiWithProvider.getEvents(),
+])
+  .then(([offers, destinations, events]) => {
+    offersModel.setOffersFromServer(offers);
+    eventsModel.setDestinations(destinations);
+    eventsModel.setEvents(EventType.INIT, UpdateType.MAJOR, events);
+    enableMenu();
+  })
+.catch(() => {
+  eventsModel.setEvents(EventType.INIT, UpdateType.MAJOR, []);
+  enableMenu();
+});
+
+window.addEventListener(`load`, () => {
+  navigator.serviceWorker.register(`/sw.js`);
+});
+
+window.addEventListener(`online`, () => {
+  document.title = document.title.replace(OFFLINE_TITLE, ``);
+  apiWithProvider.sync();
+});
+
+window.addEventListener(`offline`, () => {
+  document.title += OFFLINE_TITLE;
+});

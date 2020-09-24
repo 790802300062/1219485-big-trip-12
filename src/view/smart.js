@@ -1,12 +1,16 @@
-import Abstract from '../view/abstract.js';
+import AbstractView from '../view/abstract.js';
 
-export default class SmartView extends Abstract {
+export default class SmartView extends AbstractView {
   constructor() {
+    if (new.target === SmartView) {
+      throw new Error(`Can't instantiate Abstract, only concrete one.`);
+    }
+
     super();
     this._data = {};
   }
 
-  updateDate(updatedData, justDataUpdating) {
+  updateData(updatedData, justDataUpdating) {
     if (!updatedData) {
       return;
     }
@@ -38,6 +42,6 @@ export default class SmartView extends Abstract {
   }
 
   restoreHandlers() {
-    throw new Error(`Abstract method not implemented`);
+    throw new Error(`Abstract method not implemented: restoreHandlers`);
   }
 }
