@@ -1,7 +1,7 @@
 import {
   render,
   RenderPosition
-}from './utils/render.js';
+} from './utils/render.js';
 
 import {
   FilterType,
@@ -92,7 +92,7 @@ const siteMenuComponent = new MenuView();
 
 const filtersPresenter = new FiltersPresenter(filtersNode, eventsModel, filterModel);
 const tripPresenter = new TripPresenter(eventsContainerNode, sortAndContentNode,
-  eventsModel, offersModel, filterModel, apiWithProvider);
+    eventsModel, offersModel, filterModel, apiWithProvider);
 
 const tripInfoPresenter = new TripInfoPresenter(tripInfoNode, eventsModel, filterModel);
 const statisticsPresenter = new StatisticsPresenter(eventsContainerNode, eventsModel);

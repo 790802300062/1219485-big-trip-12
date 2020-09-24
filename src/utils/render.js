@@ -26,7 +26,7 @@ export const render = (container, element, place) => {
       container.insertAdjacentElement(place, element);
       break;
     default:
-      throw new Error(`Impossible to determine the position to render`)
+      throw new Error(`Impossible to determine the position to render`);
   }
 };
 

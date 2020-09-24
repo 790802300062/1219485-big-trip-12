@@ -108,7 +108,7 @@ export default class EventPresenter {
         this._eventEditComponent.shake(resetFormState);
         break;
       default:
-        throw new Error('Impossible to determine State');
+        throw new Error(`Impossible to determine State`);
     }
   }
 

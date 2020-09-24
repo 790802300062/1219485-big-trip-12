@@ -4,18 +4,16 @@ import {
 } from '../const.js';
 
 import {
- render,
- append,
- replace,
- RenderPosition
+  render,
+  append,
+  replace,
+  RenderPosition
 } from '../utils/render.js';
 
 import TripInfoView from '../view/trip-info.js';
 import TripCostView from '../view/trip-cost.js';
 import TripRouteView from '../view/trip-route.js';
 import EventsPresenter from '../presenter/events.js';
-
-
 
 export default class TripInfoPresenter extends EventsPresenter {
   constructor(tripInfoContainer, eventsModel, filterModel) {

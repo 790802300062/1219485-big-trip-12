@@ -212,7 +212,7 @@ export default class StatisticsView extends AbstractView {
       }
 
       if (transportTypes.includes(event.type)) {
-          eventsTransport[event.type] = 1;
+        eventsTransport[event.type] = 1;
       }
     });
 

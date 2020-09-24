@@ -11,7 +11,7 @@ const Url = {
   EVENTS: `points`,
   DESTINATIONS: `destinations`,
   OFFERS: `offers`
-}
+};
 
 export default class Api {
   constructor(endPoint, authorization) {
