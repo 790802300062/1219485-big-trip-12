@@ -428,7 +428,7 @@ export default class EventEditView extends Smart {
     let priceMessage = ``;
     let validity = true;
 
-    if (!(parseInt(priceField.value, 10))) {
+    if (!(parseInt(priceField.value, 10)) || (parseInt(priceField.value, 10)) < 0) {
       priceMessage = `Стоимость должны быть больше ноля`;
       validity = false;
     }
