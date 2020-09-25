@@ -12,7 +12,7 @@ import {
 
 import AbstractView from './abstract-view.js';
 
-const ChartProperties = {
+const ChartProperty = {
   TYPE: `horizontalBar`,
   BAR_HEIGHT: 400,
   BAR_THICKNESS: 44,
@@ -23,7 +23,7 @@ const ChartProperties = {
   AXE_Y_FONT_SIZE: 13,
 };
 
-const ChartValues = {
+const ChartValue = {
   WHITE: `#ffffff`,
   BLACK: `#000000`,
   START: `start`,
@@ -89,9 +89,9 @@ export default class StatisticsView extends AbstractView {
     const transportCtx = this.getElement().querySelector(`.statistics__chart--transport`);
     const timeSpendCtx = this.getElement().querySelector(`.statistics__chart--time`);
 
-    moneyCtx.height = ChartProperties.BAR_HEIGHT;
-    transportCtx.height = ChartProperties.BAR_HEIGHT;
-    timeSpendCtx.height = ChartProperties.BAR_HEIGHT;
+    moneyCtx.height = ChartProperty.BAR_HEIGHT;
+    transportCtx.height = ChartProperty.BAR_HEIGHT;
+    timeSpendCtx.height = ChartProperty.BAR_HEIGHT;
 
     this._moneyChart = this._renderChart(
         moneyCtx,
@@ -115,43 +115,43 @@ export default class StatisticsView extends AbstractView {
   _renderChart(ctx, text, formatter) {
     return new Chart(ctx, {
       plugins: [ChartDataLabels],
-      type: ChartProperties.TYPE,
+      type: ChartProperty.TYPE,
       data: {
         labels: this._data[text].labels,
         datasets: [{
           data: this._data[text].data,
-          backgroundColor: ChartValues.WHITE,
-          hoverBackgroundColor: ChartValues.WHITE,
-          anchor: ChartValues.START,
-          barThickness: ChartProperties.BAR_THICKNESS,
-          minBarLength: ChartProperties.MIN_BAR_LENGTH
+          backgroundColor: ChartValue.WHITE,
+          hoverBackgroundColor: ChartValue.WHITE,
+          anchor: ChartValue.START,
+          barThickness: ChartProperty.BAR_THICKNESS,
+          minBarLength: ChartProperty.MIN_BAR_LENGTH
         }]
       },
       options: {
         plugins: {
           datalabels: {
             font: {
-              size: ChartProperties.FONT_SIZE
+              size: ChartProperty.FONT_SIZE
             },
-            color: ChartValues.BLACK,
-            anchor: ChartValues.END,
-            align: ChartValues.START,
+            color: ChartValue.BLACK,
+            anchor: ChartValue.END,
+            align: ChartValue.START,
             formatter
           }
         },
         title: {
           display: true,
           text,
-          fontColor: ChartValues.BLACK,
-          fontSize: ChartProperties.TITLE_FONT_SIZE,
-          position: ChartValues.LEFT
+          fontColor: ChartValue.BLACK,
+          fontSize: ChartProperty.TITLE_FONT_SIZE,
+          position: ChartValue.LEFT
         },
         scales: {
           yAxes: [{
             ticks: {
-              fontColor: ChartValues.BLACK,
-              padding: ChartProperties.AXE_Y_PADDING,
-              fontSize: ChartProperties.AXE_Y_FONT_SIZE,
+              fontColor: ChartValue.BLACK,
+              padding: ChartProperty.AXE_Y_PADDING,
+              fontSize: ChartProperty.AXE_Y_FONT_SIZE,
             },
             gridLines: {
               display: false,

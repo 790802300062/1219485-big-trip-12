@@ -1,4 +1,4 @@
-export const AUTHORIZATION = `Basic id790802300062bigtripjkhgjhg45874jh`;
+export const AUTHORIZATION = `Basic id790802300062bigtripjkhgjhjkbhvbgsssg45874jh`;
 export const END_POINT = `https://12.ecmascript.pages.academy/big-trip/`;
 
 export const EventCategory = {
