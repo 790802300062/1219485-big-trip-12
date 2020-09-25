@@ -34,14 +34,14 @@ const BLANK_EVENT = {
   photos: []
 };
 
-const FLATPICKR_PROPERTIES = {
+const FLATPICKR_PROPERTY = {
   'dateFormat': `DD/MM/YY HH:mm`,
   'enableTime': true,
   'time_24hr': true,
   'formatDate': (date, format) => moment(date).format(format)
 };
 
-const HtmlClasses = {
+const HtmlClass = {
   CITY: `event__field-group--destination`,
   PRICE: `event__input--price`
 };
@@ -119,8 +119,8 @@ export default class EventEditView extends Smart {
               <span class="visually-hidden">Price</span>
               &euro;
             </label>
-            <input class="event__input ${HtmlClasses.PRICE}" id="event-price-1"
-            type="number" name="event-price" value="${price}" ${isDisabled ? `disabled` : ``}>
+            <input class="event__input ${HtmlClass.PRICE}" id="event-price-1"
+            type="number" name="event-price" value="${price}" max="1000000" ${isDisabled ? `disabled` : ``} >
           </div>
 
           <button class="event__save-btn btn btn--blue" type="submit" ${isDisabled ? `disabled` : ``}>
@@ -204,7 +204,7 @@ export default class EventEditView extends Smart {
               defaultDate: this._data.timeStart,
               onChange: this._startDateChangeHandler
             },
-            FLATPICKR_PROPERTIES
+            FLATPICKR_PROPERTY
         )
     );
 
@@ -217,7 +217,7 @@ export default class EventEditView extends Smart {
               minTime: `00:05`,
               onChange: this._endDateChangeHandler
             },
-            FLATPICKR_PROPERTIES
+            FLATPICKR_PROPERTY
         )
     );
   }
@@ -225,9 +225,9 @@ export default class EventEditView extends Smart {
   _setInnerHandlers() {
     this.getElement().querySelector(`.event__type-list`)
       .addEventListener(`click`, this._eventTypeChangeHandler);
-    this.getElement().querySelector(`.${HtmlClasses.CITY}`)
+    this.getElement().querySelector(`.${HtmlClass.CITY}`)
       .addEventListener(`change`, this._eventCityChangeHandler);
-    this.getElement().querySelector(`.${HtmlClasses.PRICE}`)
+    this.getElement().querySelector(`.${HtmlClass.PRICE}`)
       .addEventListener(`change`, this._eventPriceChangeHandler);
 
     if (this._offersByType.get(this._data.type)
@@ -356,7 +356,7 @@ export default class EventEditView extends Smart {
     const {type, city, isDisabled} = this._data;
 
     return (
-      `<div class="event__field-group ${HtmlClasses.CITY}">
+      `<div class="event__field-group ${HtmlClass.CITY}">
         <label class="event__label event__type-output" for="event-destination-1">
           ${generateEventPreposition(type)}
         </label>
@@ -403,7 +403,7 @@ export default class EventEditView extends Smart {
   }
 
   _checkCityValidity() {
-    const cityField = this.getElement().querySelector(`.${HtmlClasses.CITY} input`);
+    const cityField = this.getElement().querySelector(`.${HtmlClass.CITY} input`);
     let cityMessage = ``;
     let validity = true;
 
@@ -424,7 +424,7 @@ export default class EventEditView extends Smart {
   }
 
   _checkPriceValidity() {
-    const priceField = this.getElement().querySelector(`.${HtmlClasses.PRICE}`);
+    const priceField = this.getElement().querySelector(`.${HtmlClass.PRICE}`);
     let priceMessage = ``;
     let validity = true;
 
