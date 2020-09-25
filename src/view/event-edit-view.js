@@ -1,5 +1,10 @@
+import flatpickr from 'flatpickr';
+import moment from 'moment';
+import he from 'he';
+import '../../node_modules/flatpickr/dist/flatpickr.min.css';
+
 import {
-  EVENT_TYPES,
+  mapCategoryToType,
   EventCategory,
   EventType
 } from '../const.js';
@@ -16,14 +21,10 @@ import {
   getNewDate
 } from '../utils/time-and-date.js';
 
-import Smart from '../view/smart.js';
-import flatpickr from 'flatpickr';
-import moment from 'moment';
-import he from 'he';
-import '../../node_modules/flatpickr/dist/flatpickr.min.css';
+import Smart from './smart-view.js';
 
 const BLANK_EVENT = {
-  type: EVENT_TYPES.get(EventCategory.TRANSFER)[0],
+  type: mapCategoryToType.get(EventCategory.TRANSFER)[0],
   city: ``,
   offers: [],
   timeStart: getNewDate(),
@@ -37,12 +38,10 @@ const FLATPICKR_PROPERTIES = {
   'dateFormat': `DD/MM/YY HH:mm`,
   'enableTime': true,
   'time_24hr': true,
-  'formatDate': (date, format) => {
-    return moment(date).format(format);
-  },
+  'formatDate': (date, format) => moment(date).format(format)
 };
 
-const HTML_CLASS = {
+const HtmlClasses = {
   CITY: `event__field-group--destination`,
   PRICE: `event__input--price`
 };
@@ -120,7 +119,7 @@ export default class EventEditView extends Smart {
               <span class="visually-hidden">Price</span>
               &euro;
             </label>
-            <input class="event__input ${HTML_CLASS.PRICE}" id="event-price-1"
+            <input class="event__input ${HtmlClasses.PRICE}" id="event-price-1"
             type="number" name="event-price" value="${price}" ${isDisabled ? `disabled` : ``}>
           </div>
 
@@ -225,9 +224,9 @@ export default class EventEditView extends Smart {
   _setInnerHandlers() {
     this.getElement().querySelector(`.event__type-list`)
       .addEventListener(`click`, this._eventTypeChangeHandler);
-    this.getElement().querySelector(`.${HTML_CLASS.CITY}`)
+    this.getElement().querySelector(`.${HtmlClasses.CITY}`)
       .addEventListener(`change`, this._eventCityChangeHandler);
-    this.getElement().querySelector(`.${HTML_CLASS.PRICE}`)
+    this.getElement().querySelector(`.${HtmlClasses.PRICE}`)
       .addEventListener(`change`, this._eventPriceChangeHandler);
 
     if (this._offersByType.get(this._data.type)
@@ -264,14 +263,14 @@ export default class EventEditView extends Smart {
       : ``;
   }
 
-  _createInnerPartOfOffersSection(offersList) {
+  _createInnerPartOfOffersSection(listOfOffers) {
     const {offers, isDisabled} = this._data;
 
     const checkedOffers = offers.reduce((result, offer) => {
       return result.set(offer.title, offer);
     }, new Map());
 
-    return offersList
+    return listOfOffers
       .map((offer) => {
         return (
           `<div class="event__offer-selector">
@@ -356,7 +355,7 @@ export default class EventEditView extends Smart {
     const {type, city, isDisabled} = this._data;
 
     return (
-      `<div class="event__field-group ${HTML_CLASS.CITY}">
+      `<div class="event__field-group ${HtmlClasses.CITY}">
         <label class="event__label event__type-output" for="event-destination-1">
           ${generateEventPreposition(type)}
         </label>
@@ -389,7 +388,7 @@ export default class EventEditView extends Smart {
   _createTypesListTemplate() {
     const checkedType = this._data.type;
 
-    return Array.from(EVENT_TYPES.entries())
+    return Array.from(mapCategoryToType.entries())
       .map(([kind, types]) => {
         return (
           `<fieldset class="event__type-group">
@@ -403,16 +402,18 @@ export default class EventEditView extends Smart {
   }
 
   _checkCityValidity() {
-    const cityField = this.getElement().querySelector(`.${HTML_CLASS.CITY} input`);
+    const cityField = this.getElement().querySelector(`.${HtmlClasses.CITY} input`);
     let cityMessage = ``;
     let validity = true;
 
-    if (cityField.value.length === 0) {
-      cityMessage = `Не указан пункт назначения`;
-      validity = false;
-    } else if (this._destinations.size
+    if (this._destinations.size
       && ![...this._destinations.keys()].includes(cityField.value)) {
       cityMessage = `Выбранный пункт назначения отсутсвует в предложенном списке`;
+      validity = false;
+    }
+
+    if (cityField.value.length === 0) {
+      cityMessage = `Не указан пункт назначения`;
       validity = false;
     }
 
@@ -422,7 +423,7 @@ export default class EventEditView extends Smart {
   }
 
   _checkPriceValidity() {
-    const priceField = this.getElement().querySelector(`.${HTML_CLASS.PRICE}`);
+    const priceField = this.getElement().querySelector(`.${HtmlClasses.PRICE}`);
     let priceMessage = ``;
     let validity = true;
 
@@ -518,8 +519,8 @@ export default class EventEditView extends Smart {
     const offerIndex = offers.findIndex((it) => it.title === evt.target.name);
 
     if (offerIndex < 0) {
-      const offersList = this._offersByType.get(this._data.type);
-      const newOffer = offersList.find((it) => it.title === evt.target.name);
+      const listOfOffers = this._offersByType.get(this._data.type);
+      const newOffer = listOfOffers.find((it) => it.title === evt.target.name);
       if (newOffer) {
         offers.push(newOffer);
       }

@@ -12,16 +12,16 @@ import {
   END_POINT
 } from './const.js';
 
-import MenuView from './view/menu.js';
+import MenuView from './view/menu-view.js';
 
-import TripPresenter from './presenter/trip.js';
-import FiltersPresenter from './presenter/filters.js';
-import TripInfoPresenter from './presenter/trip-info.js';
-import StatisticsPresenter from './presenter/statistics.js';
+import TripPresenter from './presenter/trip-presenter.js';
+import FiltersPresenter from './presenter/filters-presenter.js';
+import TripInfoPresenter from './presenter/trip-info-presenter.js';
+import StatisticsPresenter from './presenter/statistics-presenter.js';
 
-import OffersModel from './model/offers.js';
-import EventsModel from './model/events.js';
-import FilterModel from './model/filter.js';
+import OffersModel from './model/offers-model.js';
+import EventsModel from './model/events-model.js';
+import FilterModel from './model/filter-model.js';
 
 import Api from './api/api.js';
 import Store from './api/store.js';

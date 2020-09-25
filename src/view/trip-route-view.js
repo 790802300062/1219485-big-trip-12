@@ -1,8 +1,8 @@
 import {getTripDatesInterval} from '../utils/time-and-date.js';
 
-import AbstractView from '../view/abstract.js';
+import AbstractView from './abstract-view.js';
 
-const LIMIT_ROUTE_CITY = 3;
+const MAX_CITY_AMOUNT = 3;
 
 export default class TripRouteView extends AbstractView {
   constructor(events) {
@@ -31,7 +31,7 @@ export default class TripRouteView extends AbstractView {
         route.push(event.city);
       }
 
-      if (route.length > LIMIT_ROUTE_CITY) {
+      if (route.length > MAX_CITY_AMOUNT) {
         return `${events[0].city} &mdash; ... &mdash; ${events[events.length - 1].city}`;
       }
     }

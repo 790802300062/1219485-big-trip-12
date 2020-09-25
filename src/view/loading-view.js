@@ -1,4 +1,4 @@
-import AbstractView from '../view/abstract.js';
+import AbstractView from './abstract-view.js';
 
 export default class LoadingView extends AbstractView {
   getTemplate() {

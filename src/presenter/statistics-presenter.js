@@ -4,7 +4,7 @@ import {
   RenderPosition
 } from '../utils/render.js';
 
-import StatisticsView from '../view/statistics.js';
+import StatisticsView from '../view/statistics-view.js';
 
 export default class StatisticsPresenter {
   constructor(header, eventsModel) {

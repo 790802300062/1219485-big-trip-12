@@ -1,9 +1,14 @@
 import moment from "moment";
 
-export const formatWholeDate = (date) => moment(date).format(`YYYY-DD-MM`);
-export const formatMonth = (date) => moment(date).format(`MMM DD`);
-export const formatDateAndTime = (time) => moment(time).format(`DD/MM/YY HH:mm`);
-export const formatTime = (time) => moment(time).format(`HH:mm`);
+const FULL_DATE_FORMAT = `YYYY-DD-MM`;
+const DATE_AND_MONTH_FORMAT = `MMM DD`;
+const DATE_AND_TIME_FORMAT = `DD/MM/YY HH:mm`;
+const TIME_FORMAT = `HH:mm`;
+
+export const formatWholeDate = (date) => moment(date).format(FULL_DATE_FORMAT);
+export const formatMonth = (date) => moment(date).format(DATE_AND_MONTH_FORMAT);
+export const formatDateAndTime = (time) => moment(time).format(DATE_AND_TIME_FORMAT);
+export const formatTime = (time) => moment(time).format(TIME_FORMAT);
 
 export const getTimeInterval = (interval) => {
   const duration = moment.duration(interval);

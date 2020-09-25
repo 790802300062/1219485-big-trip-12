@@ -1,17 +1,18 @@
+import Chart from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
 import {getTimeInterval} from '../utils/time-and-date.js';
 import {getDuration} from '../utils/common.js';
 import {
   VehicleEmoji,
-  EVENT_TYPES,
+  mapCategoryToType,
   ChartType,
   EventCategory
 } from '../const.js';
 
-import AbstractView from '../view/abstract.js';
-import Chart from 'chart.js';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
+import AbstractView from './abstract-view.js';
 
-const ChartProperty = {
+const ChartProperties = {
   TYPE: `horizontalBar`,
   BAR_HEIGHT: 400,
   BAR_THICKNESS: 44,
@@ -22,7 +23,7 @@ const ChartProperty = {
   AXE_Y_FONT_SIZE: 13,
 };
 
-const ChartColorsValue = {
+const ChartValues = {
   WHITE: `#ffffff`,
   BLACK: `#000000`,
   START: `start`,
@@ -88,69 +89,69 @@ export default class StatisticsView extends AbstractView {
     const transportCtx = this.getElement().querySelector(`.statistics__chart--transport`);
     const timeSpendCtx = this.getElement().querySelector(`.statistics__chart--time`);
 
-    moneyCtx.height = ChartProperty.BAR_HEIGHT;
-    transportCtx.height = ChartProperty.BAR_HEIGHT;
-    timeSpendCtx.height = ChartProperty.BAR_HEIGHT;
+    moneyCtx.height = ChartProperties.BAR_HEIGHT;
+    transportCtx.height = ChartProperties.BAR_HEIGHT;
+    timeSpendCtx.height = ChartProperties.BAR_HEIGHT;
 
     this._moneyChart = this._renderChart(
         moneyCtx,
         ChartType.MONEY,
-        ((val) => `€ ${val}`)
+        ((value) => `€ ${value}`)
     );
 
     this._transportChart = this._renderChart(
         transportCtx,
         ChartType.TRANSPORT,
-        (val) => `${val}x`
+        (value) => `${value}`
     );
 
     this._timeSpendChart = this._renderChart(
         timeSpendCtx,
         ChartType.TIME_SPENT,
-        (val) => `${getTimeInterval(val)}`
+        (value) => `${getTimeInterval(value)}`
     );
   }
 
   _renderChart(ctx, text, formatter) {
     return new Chart(ctx, {
       plugins: [ChartDataLabels],
-      type: ChartProperty.TYPE,
+      type: ChartProperties.TYPE,
       data: {
         labels: this._data[text].labels,
         datasets: [{
           data: this._data[text].data,
-          backgroundColor: ChartColorsValue.WHITE,
-          hoverBackgroundColor: ChartColorsValue.WHITE,
-          anchor: ChartColorsValue.START,
-          barThickness: ChartProperty.BAR_THICKNESS,
-          minBarLength: ChartProperty.MIN_BAR_LENGTH
+          backgroundColor: ChartValues.WHITE,
+          hoverBackgroundColor: ChartValues.WHITE,
+          anchor: ChartValues.START,
+          barThickness: ChartProperties.BAR_THICKNESS,
+          minBarLength: ChartProperties.MIN_BAR_LENGTH
         }]
       },
       options: {
         plugins: {
           datalabels: {
             font: {
-              size: ChartProperty.FONT_SIZE
+              size: ChartProperties.FONT_SIZE
             },
-            color: ChartColorsValue.BLACK,
-            anchor: ChartColorsValue.END,
-            align: ChartColorsValue.START,
+            color: ChartValues.BLACK,
+            anchor: ChartValues.END,
+            align: ChartValues.START,
             formatter
           }
         },
         title: {
           display: true,
           text,
-          fontColor: ChartColorsValue.BLACK,
-          fontSize: ChartProperty.TITLE_FONT_SIZE,
-          position: ChartColorsValue.LEFT
+          fontColor: ChartValues.BLACK,
+          fontSize: ChartProperties.TITLE_FONT_SIZE,
+          position: ChartValues.LEFT
         },
         scales: {
           yAxes: [{
             ticks: {
-              fontColor: ChartColorsValue.BLACK,
-              padding: ChartProperty.AXE_Y_PADDING,
-              fontSize: ChartProperty.AXE_Y_FONT_SIZE,
+              fontColor: ChartValues.BLACK,
+              padding: ChartProperties.AXE_Y_PADDING,
+              fontSize: ChartProperties.AXE_Y_FONT_SIZE,
             },
             gridLines: {
               display: false,
@@ -202,7 +203,7 @@ export default class StatisticsView extends AbstractView {
   }
 
   _getTransportChartData(events) {
-    const transportTypes = EVENT_TYPES.get(EventCategory.TRANSFER);
+    const transportTypes = mapCategoryToType.get(EventCategory.TRANSFER);
     const eventsTransport = {};
 
     events.forEach((event) => {

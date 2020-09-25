@@ -1,7 +1,7 @@
 import {FilterType} from '../const.js';
 import {isInputTag} from '../utils/common.js';
 
-import AbstractView from '../view/abstract.js';
+import AbstractView from './abstract-view.js';
 
 export default class FiltersView extends AbstractView {
   constructor(currentFilterType, filters, filtersEnabled) {

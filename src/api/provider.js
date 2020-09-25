@@ -1,6 +1,7 @@
-import EventsModel from "../model/events.js";
-import {isOnline} from "../utils/common.js";
-import {nanoid} from "nanoid";
+import {nanoid} from 'nanoid';
+import {isOnline} from '../utils/common.js';
+
+import EventsModel from '../model/events-model.js';
 
 const SYNC_ERROR_MESSAGE = `Sync data failed`;
 

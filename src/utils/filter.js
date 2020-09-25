@@ -1,5 +1,5 @@
-import {FilterType} from '../const.js';
 import moment from 'moment';
+import {FilterType} from '../const.js';
 
 export const filter = {
   [FilterType.FUTURE]: (events) => events.filter((event) => {

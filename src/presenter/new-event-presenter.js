@@ -10,7 +10,7 @@ import {
   State
 } from '../const.js';
 
-import EventEditView from '../view/event-edit.js';
+import EventEditView from '../view/event-edit-view.js';
 
 export default class NewEventPresenter {
   constructor(eventsModel, offersModel, changeData) {

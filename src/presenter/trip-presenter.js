@@ -14,16 +14,16 @@ import {
   State
 } from '../const.js';
 
-import SortView from '../view/sort.js';
-import DaysListView from '../view/days-list.js';
-import DayView from '../view/day.js';
-import EventsListView from '../view/events-list.js';
-import NoEventsView from '../view/no-events.js';
-import LoadingView from '../view/loading.js';
+import SortView from '../view/sort-view.js';
+import DaysListView from '../view/days-list-view.js';
+import DayView from '../view/day-view.js';
+import EventsListView from '../view/events-list-view.js';
+import NoEventsView from '../view/no-events-view.js';
+import LoadingView from '../view/loading-view.js';
 
-import EventPresenter from '../presenter/event.js';
-import EventsPresenter from '../presenter/events.js';
-import NewEventPresenter from '../presenter/new-event.js';
+import EventPresenter from '../presenter/event-presenter.js';
+import EventsPresenter from '../presenter/events-presenter.js';
+import NewEventPresenter from '../presenter/new-event-presenter.js';
 
 const SORT_KEY = `sort`;
 

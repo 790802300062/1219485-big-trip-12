@@ -1,7 +1,7 @@
 import {isLinkTag} from '../utils/common.js';
 import {MenuItem} from '../const.js';
 
-import AbstractView from '../view/abstract.js';
+import AbstractView from './abstract-view.js';
 
 const ACTIVE_CLASS = `trip-tabs__btn--active`;
 

@@ -10,8 +10,8 @@ import {
   remove
 } from '../utils/render.js';
 
-import EventView from '../view/event.js';
-import EventEditView from '../view/event-edit.js';
+import EventView from '../view/event-view.js';
+import EventEditView from '../view/event-edit-view.js';
 
 const Mode = {
   DEFAULT: `DEFAULT`,
@@ -112,8 +112,8 @@ export default class EventPresenter {
     }
   }
 
-  setPropertyFavorite(updatedServerDataEvent) {
-    this._event = updatedServerDataEvent;
+  setPropertyFavorite(updatedServerEvent) {
+    this._event = updatedServerEvent;
 
     const eventData = this._eventEditComponent.getUnsavedUserData();
     eventData.isFavorite = !eventData.isFavorite;

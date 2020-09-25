@@ -1,7 +1,7 @@
 import {isInputTag} from '../utils/common.js';
 import {SortType} from '../const.js';
 
-import AbstractView from '../view/abstract.js';
+import AbstractView from './abstract-view.js';
 
 
 export default class SortView extends AbstractView {

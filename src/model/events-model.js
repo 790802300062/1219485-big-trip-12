@@ -1,5 +1,5 @@
-import Observer from '../utils/observer.js';
 import {makeFirstLetterUppercased} from '../utils/common.js';
+import Observer from '../utils/observer.js';
 
 export default class EventsModel extends Observer {
   constructor(offersModel) {

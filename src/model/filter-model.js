@@ -1,9 +1,10 @@
-import Observer from '../utils/observer.js';
 import {
   FilterType,
   EventType,
   UpdateType
 } from '../const.js';
+
+import Observer from '../utils/observer.js';
 
 export default class FilterModel extends Observer {
   constructor() {

@@ -1,4 +1,4 @@
-import FiltersView from '../view/filters.js';
+import FiltersView from '../view/filters-view.js';
 import {UpdateType} from '../const.js';
 import {filter} from '../utils/filter.js';
 import {

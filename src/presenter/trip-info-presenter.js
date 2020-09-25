@@ -10,10 +10,10 @@ import {
   RenderPosition
 } from '../utils/render.js';
 
-import TripInfoView from '../view/trip-info.js';
-import TripCostView from '../view/trip-cost.js';
-import TripRouteView from '../view/trip-route.js';
-import EventsPresenter from '../presenter/events.js';
+import TripInfoView from '../view/trip-info-view.js';
+import TripCostView from '../view/trip-cost-view.js';
+import TripRouteView from '../view/trip-route-view.js';
+import EventsPresenter from './events-presenter.js';
 
 export default class TripInfoPresenter extends EventsPresenter {
   constructor(tripInfoContainer, eventsModel, filterModel) {

@@ -8,9 +8,9 @@ import {
   getTimeInterval
 } from '../utils/time-and-date.js';
 
-import AbstractView from '../view/abstract';
+import AbstractView from './abstract-view';
 
-const MAX_DISPLAY_OFFERS = 3;
+const MAX_OFFERS_AMOUNT = 3;
 
 export default class EventView extends AbstractView {
   constructor(offersByType, event) {
@@ -79,7 +79,7 @@ export default class EventView extends AbstractView {
   }
 
   _createEventOffersTemplate() {
-    const displayOffersNumber = Math.min(this._event.offers.length, MAX_DISPLAY_OFFERS);
+    const displayOffersNumber = Math.min(this._event.offers.length, MAX_OFFERS_AMOUNT);
 
     return displayOffersNumber
       ? this._event.offers.slice(0, displayOffersNumber).map((offer) => {

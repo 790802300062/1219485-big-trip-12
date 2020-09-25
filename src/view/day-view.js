@@ -3,7 +3,7 @@ import {
   formatMonth
 } from '../utils/time-and-date.js';
 
-import AbstractView from '../view/abstract.js';
+import AbstractView from './abstract-view.js';
 
 export default class DayView extends AbstractView {
   constructor(date, index, visible) {

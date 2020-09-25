@@ -1,4 +1,4 @@
-export const AUTHORIZATION = `Basic id790802300062bigtripkejgjkhelkjh`;
+export const AUTHORIZATION = `Basic id790802300062bigtripjkhgjhg45874jh`;
 export const END_POINT = `https://12.ecmascript.pages.academy/big-trip/`;
 
 export const EventCategory = {
@@ -6,7 +6,7 @@ export const EventCategory = {
   ACTIVITY: `Activity`
 };
 
-export const EVENT_TYPES = new Map([
+export const mapCategoryToType = new Map([
   [EventCategory.TRANSFER, [
     `Taxi`,
     `Bus`,
