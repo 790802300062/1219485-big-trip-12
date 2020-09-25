@@ -214,6 +214,7 @@ export default class EventEditView extends Smart {
             {
               defaultDate: this._data.timeEnd,
               minDate: this._data.timeStart,
+              minTime: `00:05`,
               onChange: this._endDateChangeHandler
             },
             FLATPICKR_PROPERTIES
@@ -552,6 +553,7 @@ export default class EventEditView extends Smart {
 
     this._endDatepicker.set(`minDate`, timeStart);
     this._endDatepicker.setDate(timeEnd);
+
     this.updateData({timeStart, timeEnd}, true);
   }
 
